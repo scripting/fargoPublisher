@@ -1,0 +1,88 @@
+<html>
+	<head>
+		<title>Package parser in JavaScript</title>
+		<script src="http://static.smallpicture.com/bootstrap/js/jquery-1.9.1.min.js"></script>
+		<script>
+			
+			function consoleLog (s) {
+				document.getElementById ("idMyConsole").innerHTML += s + "<br>";
+				console.log (s);
+				}
+			function readFile (url) { //a synchronous file read
+				var readHttpUrl = "http://trex.smallpicture.com/ajax/httpReadUrl";
+				return ($.ajax ({ 
+					url: readHttpUrl + "?url=" + encodeURIComponent (url) + "&type=" + encodeURIComponent ("text/plain"),
+					headers: {"Accept": "text/x-opml"},
+					async: false,
+					dataType: "text" , 
+					timeout: 30000 
+					}).responseText);
+				}
+			
+			function xmlGetStruct (opmltext) {
+				return ($($.parseXML (opmltext)));
+				}
+			function xmlGetAddress (adrx, name) {
+				return (adrx.find (name));
+				}
+			function xmlGetValue (adrx, name) {
+				return (adrx.find (name).text ());
+				}
+			function parsePackages (s) {
+				var magicpattern = "<[{~#--- ", ix, path, htmltext;
+				while (s.length > 0) {
+					ix = s.indexOf (magicpattern);
+					if (ix < 0) {
+						break;
+						}
+					s = s.substr (ix + magicpattern.length);
+					ix = s.indexOf ("\n");
+					path = s.substr (0, ix);
+					s = s.substr (ix + 1);
+					ix = s.indexOf (magicpattern);
+					if (ix < 0) {
+						htmltext = s;
+						}
+					else {
+						htmltext = s.substr (1, ix);
+						s = s.substr (ix);
+						}
+					consoleLog ("\"" + path + "\" == " + htmltext.length + " characters.");
+					}
+				}
+			function handlePackagePing (urloutline) {
+				var opmltext = readFile (urloutline);
+				var xstruct = xmlGetStruct (opmltext);
+				var adropml = xmlGetAddress (xstruct, "opml");
+				var adrhead = xmlGetAddress (adropml, "head");
+				var urlpackage = xmlGetValue (adrhead, "linkHosting");
+				consoleLog ("Package url == " + urlpackage);
+				var packagetext = readFile (urlpackage);
+				parsePackages (packagetext);
+				}
+			
+			function startup () {
+				
+				handlePackagePing ("https://dl.dropbox.com/s/v8e5gighrh8prpc/myPublicProfile.opml");
+				}
+			</script>
+		<style>
+			.divMyConsole {
+				margin-top: 100px;
+				width: 70%;
+				margin-left: auto;
+				margin-right: auto;
+				line-height: 150%;
+				font-size: 15px;
+				font-family: "Arial";
+				}
+			</style>
+		</head>
+	<body>
+		<div class="divMyConsole" id="idMyConsole">
+			</div>
+		<script>
+			startup ();
+			</script>
+		</body>
+	</html>
