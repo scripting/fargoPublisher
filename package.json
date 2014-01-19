@@ -4,7 +4,7 @@
   "description": "A simple test app to get started.",
   "version": "0.0.1",
   "scripts": {
-     "start": "node index.js"
+     "start": "node brentserver.js"
   },
   "engines": {
     "node": "0.6.x"
