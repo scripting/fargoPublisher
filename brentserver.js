@@ -118,7 +118,7 @@ var writeStaticFile = function (path, data, type, acl) {
 console.log ("starting server");
 var counter = 0;
 var server = http.createServer (function (request, response) {
-	console.log (request);
+	console.log (request.url);
 	
 	response.writeHead (200, {"Content-Type": "text/plain"});
 	var color = 'blue';
