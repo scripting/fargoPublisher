@@ -12,13 +12,25 @@ var s3 = new AWS.S3 ();
 var http = require ('http');
 
 var writeStaticFile = function (path, data, type, acl) {
-	var bucketname = "tmp.scripting.com";
+	var bucketname = "";
 	if (type == undefined) {
 		type = "text/plain";
 		}
 	if (acl == undefined) {
 		acl = "public-read";
 		}
+	
+	//split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
+		if (path.length > 0) {
+			if (path [0] == "/") { //delete the slash
+				path = path.substr (1); 
+				}
+			var ix = path.indexOf ("/");
+			bucketname = path.substr (0, ix);
+			path = path.substr (ix);
+			console.log ("Writing to bucket: \"" + bucketname + "\" path: \"" + path + "\"");
+			}
+	
 	var params = {
 		ACL: acl,
 		ContentType: type,
@@ -40,7 +52,7 @@ var server = http.createServer(function(request, response) {
 		color = 'no, green';
 		}
 	response.end(color);
-	writeStaticFile ("testing/" + counter + ".txt", new Date ().toString ());
+	writeStaticFile ("/tmp.scripting.com/testing/" + counter + ".txt", new Date ().toString ());
 	counter++;
 	});
 server.listen (1337);
