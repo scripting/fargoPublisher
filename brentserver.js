@@ -117,13 +117,15 @@ var writeStaticFile = function (path, data, type, acl) {
 
 console.log ("starting server");
 var counter = 0;
-var server = http.createServer(function(request, response) {
-	response.writeHead(200, {'Content-Type': 'text/plain'});
+var server = http.createServer (function (request, response) {
+	console.log (request);
+	
+	response.writeHead (200, {"Content-Type": "text/plain"});
 	var color = 'blue';
 	if (counter % 2 === 1) {
 		color = 'no, green';
 		}
-	response.end(color);
+	response.end (color);
 	writeStaticFile ("/tmp.scripting.com/testing/" + padWithZeros (counter, 4) + ".txt", new Date ().toString ());
 	counter++;
 	});
