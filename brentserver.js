@@ -1,5 +1,5 @@
 
-var writeStaticFile (path, filetext, type) {
+var writeStaticFile = function (path, filetext, type) {
 	if (type == undefined) {
 		type = "text/plain";
 		}
@@ -23,8 +23,9 @@ var AWS = require ("aws-sdk");
 console.log ("AWS initialized");
 var s3 = new AWS.S3 ();
 console.log ("S3 initialized");
-//create a new object at http://tmp.scripting.com/testing/helloJitsu.txt containing "hello world"
-	writeStaticFile ("testing/helloJitsu.txt", "hello world");
+
+writeStaticFile ("testing/helloJitsu.txt", "hello world");
+
 console.log ("Entering loop.");
 var http = require ('http');
 var counter = 0;
