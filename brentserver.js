@@ -18,6 +18,26 @@ var padWithZeros = function (num, ctplaces) {
 		}
 	return (s);
 	}
+var isAlpha = function (ch) {
+	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
+	}
+
+var readHttp = function (server, path, callback) {
+	var options = {
+		host: "tmp.scripting.com",
+		path: "/testing/0012.txt"
+		};
+	http.request (options, function (response) {
+		var httpresult = "";
+		response.on ("data", function (chunk) {
+			httpresult += chunk;
+			});
+		response.on ("end", function () {
+			console.log ('readHttp: " + httpresult);
+			});
+		}).end ();
+	}
+
 var writeStaticFile = function (path, data, type, acl) {
 	var bucketname = "";
 	if (type == undefined) {
@@ -49,6 +69,7 @@ var writeStaticFile = function (path, data, type, acl) {
 		});
 	}
 
+readHttp ();
 console.log ("starting server");
 var counter = 0;
 var server = http.createServer(function(request, response) {
