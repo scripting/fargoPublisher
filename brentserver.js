@@ -1,21 +1,30 @@
-console.log ("Brent's server app");
-var AWS = require ("aws-sdk");
-console.log ("AWS initialized");
-var s3 = new AWS.S3 ();
-console.log ("S3 initialized");
-//create a new object at http://tmp.scripting.com/testing/helloJitsu.txt containing "hello world"
+
+var writeStaticFile (path, filetext, type) {
+	if (type == undefined) {
+		type = "text/plain";
+		}
 	var params = {
 		ACL: "public-read",
-		ContentType: "text/plain",
-		Body: "hello world",
+		ContentType: type,
+		Body: filetext,
 		Bucket: "tmp.scripting.com",
-		Key: "testing/helloJitsu.txt"
+		Key: path
 		};
 	s3.putObject (params, function (err, data) { 
 		console.log ("S3 object put");
 		console.log (err);
 		console.log (data);
 		});
+	}
+
+
+console.log ("Brent's server app");
+var AWS = require ("aws-sdk");
+console.log ("AWS initialized");
+var s3 = new AWS.S3 ();
+console.log ("S3 initialized");
+//create a new object at http://tmp.scripting.com/testing/helloJitsu.txt containing "hello world"
+	writeStaticFile ("testing/helloJitsu.txt", "hello world");
 console.log ("Entering loop.");
 var http = require ('http');
 var counter = 0;
