@@ -11,6 +11,13 @@ var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var http = require ('http');
 
+var padWithZeros = function (num, ctplaces) {
+	var s = num.toString ();
+	while (s.length < ctplaces) {
+		s = "0" + s;
+		}
+	return (s);
+	}
 var writeStaticFile = function (path, data, type, acl) {
 	var bucketname = "";
 	if (type == undefined) {
@@ -28,7 +35,6 @@ var writeStaticFile = function (path, data, type, acl) {
 			var ix = path.indexOf ("/");
 			bucketname = path.substr (0, ix);
 			path = path.substr (ix + 1);
-			console.log ("Writing to bucket: \"" + bucketname + "\" path: \"" + path + "\"");
 			}
 	
 	var params = {
@@ -52,7 +58,7 @@ var server = http.createServer(function(request, response) {
 		color = 'no, green';
 		}
 	response.end(color);
-	writeStaticFile ("/tmp.scripting.com/testing/" + counter + ".txt", new Date ().toString ());
+	writeStaticFile ("/tmp.scripting.com/testing/" + padWithZeros (counter, 4) + ".txt", new Date ().toString ());
 	counter++;
 	});
 server.listen (1337);
