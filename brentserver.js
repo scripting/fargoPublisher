@@ -1,5 +1,6 @@
 
 var writeStaticFile = function (path, filetext, type) {
+	var bucketname = "tmp.scripting.com";
 	if (type == undefined) {
 		type = "text/plain";
 		}
@@ -7,13 +8,13 @@ var writeStaticFile = function (path, filetext, type) {
 		ACL: "public-read",
 		ContentType: type,
 		Body: filetext,
-		Bucket: "tmp.scripting.com",
+		Bucket: bucketname,
 		Key: path
 		};
 	s3.putObject (params, function (err, data) { 
-		console.log ("S3 object put");
-		console.log (err);
-		console.log (data);
+		
+		console.log ("Wrote S3 file: http://" + bucketname + "/" + path);
+		
 		});
 	}
 
