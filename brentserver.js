@@ -37,7 +37,7 @@ var server = http.createServer(function(request, response) {
 		color = 'no, green';
 		}
 	response.end(color);
-	writeStaticFile ("testing/" + counter + ".txt", "hello world");
+	writeStaticFile ("testing/" + counter + ".txt", new Date ().toString ());
 	counter++;
 	});
 server.listen (1337);
