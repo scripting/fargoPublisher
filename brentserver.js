@@ -1,3 +1,12 @@
+//Copyright 2014, Small Picture, Inc.
+	//1/19/14 by DW
+		//This is a shell for developing the functionality of the Fargo back-end.
+		//When done, it will take requests saying that a named outline has updated.
+		//It will know how to find the OPML, and from there, to find a "package" of updates.
+		//Which it will then parse, and upload to a bucket on S3.
+		//Still have a ways to go, but it's fun, and a lot is working! :-)
+
+
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var http = require ('http');
