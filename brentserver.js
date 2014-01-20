@@ -108,7 +108,10 @@ var writeStaticFile = function (path, data, type, acl) {
 		Key: path
 		};
 	s3.putObject (params, function (err, data) { 
-		console.log ("Wrote S3 file: http://" + bucketname + "/" + path);
+		console.log ("Wrote: http://" + bucketname + "/" + path);
+		httpReadUrl ("http://" + bucketname + "/" + path, function (s) {
+			console.log ("httpReadUrl: " + s + ".");
+			});
 		});
 	}
 
