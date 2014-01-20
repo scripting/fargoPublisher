@@ -16,7 +16,7 @@ console.log ("S3 initialized");
 		console.log (err);
 		console.log (data);
 		});
-console.log ("Entering loop");
+console.log ("Entering loop.");
 var http = require ('http');
 var counter = 0;
 var server = http.createServer(function(request, response) {
