@@ -27,7 +27,7 @@ var writeStaticFile = function (path, data, type, acl) {
 				}
 			var ix = path.indexOf ("/");
 			bucketname = path.substr (0, ix);
-			path = path.substr (ix);
+			path = path.substr (ix + 1);
 			console.log ("Writing to bucket: \"" + bucketname + "\" path: \"" + path + "\"");
 			}
 	
