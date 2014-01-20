@@ -6,6 +6,14 @@
   "scripts": {
      "start": "node brentserver.js"
   },
+  
+  
+ "dependencies" : {
+    "aws-sdk"   :  "*"
+  }, 
+  
+  
+  
   "engines": {
     "node": "0.6.x"
   }
