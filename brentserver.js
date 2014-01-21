@@ -93,7 +93,7 @@ var server = http.createServer (function (request, response) {
 	
 	var parsedUrl = urlpack.parse (request.url, true);
 	
-	switch (parsedUrl.path.toLowerCase ()) {
+	switch (parsedUrl.pathname.toLowerCase ()) {
 		case "/":
 			response.writeHead (200, {"Content-Type": "text/plain"});
 			var color = 'blue';
