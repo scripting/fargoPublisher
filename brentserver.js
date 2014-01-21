@@ -88,13 +88,23 @@ var counter = 0;
 var server = http.createServer (function (request, response) {
 	console.log (request.url);
 	
-	response.writeHead (200, {"Content-Type": "text/plain"});
-	var color = 'blue';
-	if (counter % 2 === 1) {
-		color = 'no, green';
+	var parsedUrl = url.parse (request.url, true);
+	
+	switch (parsedUrl.path.toLowerCase ()) {
+		case "/":
+			response.writeHead (200, {"Content-Type": "text/plain"});
+			var color = 'blue';
+			if (counter % 2 === 1) {
+				color = 'no, green';
+				}
+			response.end (color);
+			writeStaticFile ("/tmp.scripting.com/testing/" + padWithZeros (counter, 4) + ".txt", new Date ().toString ());
+			counter++;
+			break;
+		case "/pingpackage":
+			response.writeHead (200, {"Content-Type": "text/plain"});
+			response.end ("Oh the buzzing of the bees and the sycamore trees. A soda water fountain!");
+			break;
 		}
-	response.end (color);
-	writeStaticFile ("/tmp.scripting.com/testing/" + padWithZeros (counter, 4) + ".txt", new Date ().toString ());
-	counter++;
 	});
 server.listen (1337);
