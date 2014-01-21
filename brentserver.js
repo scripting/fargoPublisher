@@ -6,48 +6,16 @@
 		//Which it will then parse, and upload to a bucket on S3.
 		//Still have a ways to go, but it's fun, and a lot is working! :-)
 
+var http = require ("http");
+var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
-var http = require ("http");
 
-//parseUri 1.2.2
-	// (c) Steven Levithan <stevenlevithan.com>
-	// MIT License
-	http://blog.stevenlevithan.com/archives/parseuri
-	
-	function parseUri (str) {
-		var	o   = parseUri.options,
-			m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
-			uri = {},
-			i   = 14;
-	
-		while (i--) uri[o.key[i]] = m[i] || "";
-	
-		uri[o.q.name] = {};
-		uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
-			if ($1) uri[o.q.name][$1] = $2;
-		});
-	
-		return uri;
-	};
-	
-	parseUri.options = {
-		strictMode: false,
-		key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-		q:   {
-			name:   "queryKey",
-			parser: /(?:^|&)([^&=]*)=?([^&]*)/g
-		},
-		parser: {
-			strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-			loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
-		}
-	};
 var httpReadUrl = function (url, callback) {
 	var httpoptions, httptext = "", httpmethod = "GET";
 	//set httpoptions with info from url
-		var x = parseUri (url);
-		if (x.port.length == 0) {
+		var x = urlpack.parse (url);
+		if (x.port == null) {
 			x.port = "80";
 			}
 		httpoptions = {
