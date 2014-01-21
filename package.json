@@ -1,15 +1,16 @@
 {
   "name": "fargoPublisher",
-  "subdomain": "fargoPub1",
-  "description": "A simple test app to get started.",
-  "version": "0.0.1",
+  "subdomain": "fargoPub2",
+  "description": "A JavaScript project to connect to Fargo to publish a folder in Dropbox.",
+  "version": "0.0.2",
   "scripts": {
-     "start": "node brentserver.js"
+     "start": "node publisher.js"
   },
   
   
  "dependencies" : {
-    "aws-sdk"   :  "*"
+    "aws-sdk": "*", 
+    "request": "*"
   }, 
   
   
