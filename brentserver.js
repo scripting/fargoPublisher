@@ -109,7 +109,7 @@ var server = http.createServer (function (request, response) {
 			handlePackagePing (parsedUrl.query.link);
 			
 			var x = {"url": parsedUrl.query.link};
-			var s = "getData (" + JSON.stringify (x) + ")"; 
+			var s = "getData (" + JSON.stringify (x) + ")";
 			response.end (s);    
 			
 			break;
