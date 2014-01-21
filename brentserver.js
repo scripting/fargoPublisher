@@ -105,6 +105,10 @@ var server = http.createServer (function (request, response) {
 			response.writeHead (200, {"Content-Type": "text/plain"});
 			response.end ("Oh the buzzing of the bees and the sycamore trees. A soda water fountain!");
 			break;
+		default:
+			response.writeHead (404, {"Content-Type": "text/plain"});
+			response.end ("404 Not Found");
+			break;
 		}
 	});
 server.listen (1337);
