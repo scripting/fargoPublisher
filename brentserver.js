@@ -108,9 +108,9 @@ var server = http.createServer (function (request, response) {
 			response.writeHead (200, {"Content-Type": "application/json"});
 			handlePackagePing (parsedUrl.query.link);
 			
-			var struct = {"url": parsedUrl.query.link)};
-			var s = "getData (" + JSON.stringify (struct) + ")"); 
-			response.end (s); 
+			var x = {"url": parsedUrl.query.link)};
+			var s = "getData (" + JSON.stringify (x) + ")"); 
+			response.end (s);    
 			
 			break;
 		default:
