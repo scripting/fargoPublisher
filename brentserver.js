@@ -110,7 +110,7 @@ var server = http.createServer (function (request, response) {
 			
 			var struct = {"url": parsedUrl.query.link)};
 			var s = "getData (" + JSON.stringify (struct) + ")"); 
-			response.end (s);
+			response.end (s); 
 			
 			break;
 		default:
