@@ -88,7 +88,7 @@ var counter = 0;
 var server = http.createServer (function (request, response) {
 	console.log (request.url);
 	
-	var parsedUrl = url.parse (request.url, true);
+	var parsedUrl = urlpack.parse (request.url, true);
 	
 	switch (parsedUrl.path.toLowerCase ()) {
 		case "/":
