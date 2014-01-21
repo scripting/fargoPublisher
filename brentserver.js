@@ -105,9 +105,13 @@ var server = http.createServer (function (request, response) {
 			counter++;
 			break;
 		case "/pingpackage":
-			response.writeHead (200, {"Content-Type": "text/plain"});
+			response.writeHead (200, {"Content-Type": "application/json"});
 			handlePackagePing (parsedUrl.query.link);
-			response.end ("Oh the buzzing of the bees and the sycamore trees. A soda water fountain!");
+			
+			var struct = {"url": parsedUrl.query.link)};
+			var s = "getData (" + JSON.stringify (struct) + ")");
+			response.end (s);
+			
 			break;
 		default:
 			response.writeHead (404, {"Content-Type": "text/plain"});
