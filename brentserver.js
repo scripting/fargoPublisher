@@ -48,6 +48,9 @@ var padWithZeros = function (num, ctplaces) {
 var isAlpha = function (ch) {
 	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
 	}
+var handlePackagePing = function (urloutline) {
+	console.log ("handlePackagePing: " + urloutline);
+	}
 
 var writeStaticFile = function (path, data, type, acl) {
 	var bucketname = "";
@@ -103,6 +106,7 @@ var server = http.createServer (function (request, response) {
 			break;
 		case "/pingpackage":
 			response.writeHead (200, {"Content-Type": "text/plain"});
+			handlePackagePing (parsedUrl.query.link);
 			response.end ("Oh the buzzing of the bees and the sycamore trees. A soda water fountain!");
 			break;
 		default:
