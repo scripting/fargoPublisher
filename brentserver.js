@@ -7,36 +7,20 @@
 		//Still have a ways to go, but it's fun, and a lot is working! :-)
 
 var http = require ("http");
+var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 
+
+
 var httpReadUrl = function (url, callback) {
-	var httpoptions, httptext = "", httpmethod = "GET";
-	//set httpoptions with info from url
-		var x = urlpack.parse (url);
-		if (x.port == null) {
-			x.port = "80";
+	request (url, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			callback (body) 
 			}
-		httpoptions = {
-			host: x.host,
-			port: x.port,
-			path: x.path,
-			method: httpmethod
-			};
-	var req = http.request (httpoptions, function (res) {
-		res.setEncoding ("utf8");
-		res.on ("data", function (chunk) {
-			httptext += chunk;
-			});
-		res.on ("end", function () {
-			callback (httptext);
-			});
 		});
-	req.on ("error", function (e) {
-		console.log ("httpReadUrl error: " + e.message);
-		});
-	req.end ();
+	
 	}
 var padWithZeros = function (num, ctplaces) {
 	var s = num.toString ();
@@ -48,8 +32,53 @@ var padWithZeros = function (num, ctplaces) {
 var isAlpha = function (ch) {
 	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
 	}
+var scrapeTagValue = function (sourcestring, tagname) {
+	var s = sourcestring; //work with a copy
+	var opentag = "<" + tagname + ">", closetag = "</" + tagname + ">";
+	var ix = s.indexOf (opentag);
+	if (ix >= 0) {
+		s = s.substr (ix + opentag.length);
+		ix = s.indexOf (closetag);
+		if (ix >= 0) {
+			s = s.substr (0, ix);
+			return (s);
+			}
+		}
+	return ("");
+	}
+function parsePackages (s) {
+	var magicpattern = "<[{~#--- ", ix, path, htmltext;
+	while (s.length > 0) {
+		ix = s.indexOf (magicpattern);
+		if (ix < 0) {
+			break;
+			}
+		s = s.substr (ix + magicpattern.length);
+		ix = s.indexOf ("\n");
+		path = s.substr (0, ix);
+		s = s.substr (ix + 1);
+		ix = s.indexOf (magicpattern);
+		if (ix < 0) {
+			htmltext = s;
+			}
+		else {
+			htmltext = s.substr (1, ix);
+			s = s.substr (ix);
+			}
+		console.log ("\"" + path + "\" == " + htmltext.length + " characters.");
+		}
+	}
+
 var handlePackagePing = function (urloutline) {
 	console.log ("handlePackagePing: " + urloutline);
+	httpReadUrl (urloutline, function (httptext) {
+		var urlpackage = scrapeTagValue (httptext, "linkHosting");
+		console.log ("package url: " + urlpackage);
+		httpReadUrl (urlpackage, function (packagetext) {
+			console.log ("package text: " + packagetext.length + " chars.");
+			parsePackages (packagetext);
+			});
+		});
 	}
 
 var writeStaticFile = function (path, data, type, acl) {
@@ -106,6 +135,7 @@ var server = http.createServer (function (request, response) {
 			break;
 		case "/pingpackage":
 			response.writeHead (200, {"Content-Type": "application/json"});
+			
 			handlePackagePing (parsedUrl.query.link);
 			
 			var x = {"url": parsedUrl.query.link};
