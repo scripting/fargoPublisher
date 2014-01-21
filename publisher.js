@@ -6,8 +6,6 @@ var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 
-
-
 var httpReadUrl = function (url, callback) {
 	request (url, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -93,7 +91,6 @@ function parsePackages (s) {
 		writeStaticFile ("/tmp.scripting.com/blog" + path, htmltext, "text/html");
 		}
 	}
-
 var handlePackagePing = function (urloutline) {
 	console.log ("handlePackagePing: " + urloutline);
 	httpReadUrl (urloutline, function (httptext) {
@@ -105,7 +102,6 @@ var handlePackagePing = function (urloutline) {
 			});
 		});
 	}
-
 
 console.log ("starting server");
 var counter = 0;
