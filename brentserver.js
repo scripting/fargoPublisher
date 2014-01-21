@@ -22,6 +22,36 @@ var httpReadUrl = function (url, callback) {
 		});
 	
 	}
+var writeStaticFile = function (path, data, type, acl) {
+	var bucketname = "";
+	if (type == undefined) {
+		type = "text/plain";
+		}
+	if (acl == undefined) {
+		acl = "public-read";
+		}
+	
+	//split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
+		if (path.length > 0) {
+			if (path [0] == "/") { //delete the slash
+				path = path.substr (1); 
+				}
+			var ix = path.indexOf ("/");
+			bucketname = path.substr (0, ix);
+			path = path.substr (ix + 1);
+			}
+	
+	var params = {
+		ACL: acl,
+		ContentType: type,
+		Body: data,
+		Bucket: bucketname,
+		Key: path
+		};
+	s3.putObject (params, function (err, data) { 
+		console.log ("Wrote: http://" + bucketname + "/" + path);
+		});
+	}
 var padWithZeros = function (num, ctplaces) {
 	var s = num.toString ();
 	while (s.length < ctplaces) {
@@ -62,10 +92,11 @@ function parsePackages (s) {
 			htmltext = s;
 			}
 		else {
-			htmltext = s.substr (1, ix);
+			htmltext = s.substr (0, ix);
 			s = s.substr (ix);
 			}
 		console.log ("\"" + path + "\" == " + htmltext.length + " characters.");
+		writeStaticFile ("/tmp.scripting.com/blog" + path, htmltext, "text/html");
 		}
 	}
 
@@ -81,39 +112,6 @@ var handlePackagePing = function (urloutline) {
 		});
 	}
 
-var writeStaticFile = function (path, data, type, acl) {
-	var bucketname = "";
-	if (type == undefined) {
-		type = "text/plain";
-		}
-	if (acl == undefined) {
-		acl = "public-read";
-		}
-	
-	//split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
-		if (path.length > 0) {
-			if (path [0] == "/") { //delete the slash
-				path = path.substr (1); 
-				}
-			var ix = path.indexOf ("/");
-			bucketname = path.substr (0, ix);
-			path = path.substr (ix + 1);
-			}
-	
-	var params = {
-		ACL: acl,
-		ContentType: type,
-		Body: data,
-		Bucket: bucketname,
-		Key: path
-		};
-	s3.putObject (params, function (err, data) { 
-		console.log ("Wrote: http://" + bucketname + "/" + path);
-		httpReadUrl ("http://" + bucketname + "/" + path, function (s) {
-			console.log ("httpReadUrl: " + s + ".");
-			});
-		});
-	}
 
 console.log ("starting server");
 var counter = 0;
