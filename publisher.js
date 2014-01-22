@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/21/2014; 10:47:28 PM
+	//Last update: 1/22/2014; 11:35:45 AM
 
 var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
 var s3defaultType = "text/plain";
@@ -71,6 +71,27 @@ var isNameDefined = function (recordkey, callback) {
 		callback (data.Item != undefined);
 		});
 	}
+
+function addNameRecord (recordkey, opmlUrl, callback) { //add "dave" to give the name dave.smallpict.com to the outline
+	httpReadUrl (opmlUrl, function (httptext) {
+		var packageUrl = scrapeTagValue (httptext, "linkHosting");
+		var params = {
+			TableName: myTableName,
+			Item: {
+				name: {"S": recordkey},
+				opmlUrl: {"S": opmlUrl},
+				packageUrl: {"S": packageUrl},
+				whenCreated: {"S": new Date ().toString ()}
+				}
+			};
+		db.putItem (params, function (err, data) {
+			if (callback != undefined) {
+				callback (err, data);
+				}
+			});
+		});
+	}
+
 var padWithZeros = function (num, ctplaces) {
 	var s = num.toString ();
 	while (s.length < ctplaces) {
@@ -80,6 +101,19 @@ var padWithZeros = function (num, ctplaces) {
 	}
 var isAlpha = function (ch) {
 	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
+	}
+var isNumeric = function (ch) {
+	return ((ch >= '0') && (ch <= '9'));
+	}
+var cleanName = function (name) {
+	var s = "";
+	for (var i = 0; i < name.length; i++) {
+		var ch = name [i];
+		if (isAlpha (ch) || isNumeric (ch)) {
+			s += ch;
+			}
+		}
+	return (s.toLowerCase (s));
 	}
 var scrapeTagValue = function (sourcestring, tagname) {
 	var s = sourcestring; //work with a copy
@@ -132,33 +166,33 @@ var handlePackagePing = function (urloutline) {
 
 console.log ("starting server");
 var counter = 0;
-var server = http.createServer (function (request, response) {
-	console.log (request.url);
+var server = http.createServer (function (httpRequest, httpResponse) {
+	console.log (httpRequest.url);
 	
-	var parsedUrl = urlpack.parse (request.url, true);
+	var parsedUrl = urlpack.parse (httpRequest.url, true);
 	
 	switch (parsedUrl.pathname.toLowerCase ()) {
 		case "/pingpackage":
-			response.writeHead (200, {"Content-Type": "application/json"});
+			httpResponse.writeHead (200, {"Content-Type": "application/json"});
 			
 			handlePackagePing (parsedUrl.query.link);
 			
 			var x = {"url": parsedUrl.query.link};
 			var s = "getData (" + JSON.stringify (x) + ")";
-			response.end (s);    
+			httpResponse.end (s);    
 			
 			break;
 		case "/isnameavailable":
-			var name = parsedUrl.query.name;
+			var name = cleanName (parsedUrl.query.name);
 			
-			response.writeHead (200, {"Content-Type": "text/html"});
+			httpResponse.writeHead (200, {"Content-Type": "text/html"});
 			
 			if (name.length == 0) {
-				response.end ("");    
+				httpResponse.end ("");    
 				}
 			else {
 				if (name.length < 4) {
-					response.end ("Name must be 4 or more characters.");
+					httpResponse.end ("Name must be 4 or more characters.");
 					}
 				else {
 					isNameDefined (name, function (fldefined) {
@@ -171,15 +205,50 @@ var server = http.createServer (function (request, response) {
 							color = "green";
 							answer = "is";
 							}
-						response.end ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
+						httpResponse.end ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
 						});
 					}
 				}
 			
-			break
+			break;
+		case "/newoutlinename":
+			var recordkey = cleanName (parsedUrl.query.name), url = parsedUrl.query.url;
+			
+			console.log ("Create new outline name: " + recordkey + ", url=" + url);
+			
+			httpResponse.writeHead (200, {"Content-Type": "application/json"});
+			
+			if (url == undefined) {
+				var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
+				console.log ("No url parameter.");
+				httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+				}
+			else {
+				isNameDefined (recordkey, function (fldefined) {
+					if (fldefined) {
+						var x = {flError: true, errorString: "Can't assign the name '" + recordkey + "' to the outline because there already is an outline with that name."};
+						console.log ("Name is defined.");
+						httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+						}
+					else {
+						addNameRecord (recordkey, url, function (err, data) {
+							if (err) {
+								console.log ("There was an error: " + JSON.stringify (err));
+								httpResponse.end ("getData (" + JSON.stringify (err) + ")");    
+								}
+							else {
+								var x = {flError: false, name: recordkey + "." + myDomain};
+								console.log ("No error: " + recordkey + "." + myDomain);
+								httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+								}
+							});
+						}
+					});
+				}
+			break;
 		default:
-			response.writeHead (404, {"Content-Type": "text/plain"});
-			response.end ("404 Not Found");
+			httpResponse.writeHead (404, {"Content-Type": "text/plain"});
+			httpResponse.end ("404 Not Found");
 			break;
 		}
 	});
