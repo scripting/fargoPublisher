@@ -1,10 +1,11 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/22/2014; 11:55:36 AM
+	//Last update: 1/22/2014; 6:45:46 PM
 
-var myVersion = "0.4";
+var myVersion = "0.41";
 var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
+var s3NamesPath = "/tmp.scripting.com/names"; //where we store name records for this domain
 var myTableName = "smallpictcom";
 var myDomain = "smallpict.com";
 
@@ -15,7 +16,7 @@ var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var db = new AWS.DynamoDB ();
 
-var httpReadUrl = function (url, callback) {
+function httpReadUrl (url, callback) {
 	request (url, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			callback (body) 
@@ -23,7 +24,20 @@ var httpReadUrl = function (url, callback) {
 		});
 	
 	}
-var writeStaticFile = function (path, data, type, acl) {
+
+function s3SplitPath (path) { //split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
+	var bucketname = "";
+	if (path.length > 0) {
+		if (path [0] == "/") { //delete the slash
+			path = path.substr (1); 
+			}
+		var ix = path.indexOf ("/");
+		bucketname = path.substr (0, ix);
+		path = path.substr (ix + 1);
+		}
+	return ({Bucket: bucketname, Key: path});
+	}
+function s3NewObject (path, data, type, acl, callback) {
 	var bucketname = "";
 	if (type == undefined) {
 		type = s3defaultType;
@@ -50,48 +64,47 @@ var writeStaticFile = function (path, data, type, acl) {
 		Key: path
 		};
 	s3.putObject (params, function (err, data) { 
-		console.log ("Wrote: http://" + bucketname + "/" + path);
+		console.log ("s3NewObject: http://" + bucketname + "/" + path);
+		if (callback != undefined) {
+			callback (err, data);
+			}
 		});
 	}
-var getNameRecord = function (recordkey, callback) { //if looking up dave.smallpict.com info, recordkey == dave
-	var params = {
-		TableName: myTableName,
-		AttributesToGet: [
-			"opmlUrl", "packageUrl", "whenCreated"
-			],
-		Key: {
-			name: {"S": recordkey}
-			}
-		}
-	db.getItem (params, function (err, data) {
+function s3GetObjectMetadata (path, callback) {
+	var params = s3SplitPath (path);
+	s3.headObject (params, function (err, data) {
 		callback (data);
 		});
 	}
-var isNameDefined = function (recordkey, callback) {
-	getNameRecord (recordkey, function (data) {
-		callback (data.Item != undefined);
+function s3GetObject (path, callback) {
+	var params = s3SplitPath (path);
+	s3.getObject (params, function (err, data) {
+		callback (data);
 		});
 	}
 
-function addNameRecord (recordkey, opmlUrl, callback) { //add "dave" to give the name dave.smallpict.com to the outline
-	httpReadUrl (opmlUrl, function (httptext) {
-		var packageUrl = scrapeTagValue (httptext, "linkHosting");
-		var params = {
-			TableName: myTableName,
-			Item: {
-				name: {"S": recordkey},
-				opmlUrl: {"S": opmlUrl},
-				packageUrl: {"S": packageUrl},
-				whenCreated: {"S": new Date ().toString ()}
-				}
-			};
-		db.putItem (params, function (err, data) {
-			if (callback != undefined) {
-				callback (err, data);
-				}
-			});
+function addNameRecord (name, opmlUrl, callback) { //add "dave" to give the name dave.smallpict.com to the outline
+	var data = {
+		"name": name,
+		"opmlUrl": opmlUrl,
+		"whenCreated": new Date ().toString ()
+		};
+	s3NewObject (s3NamesPath + "/" + name + ".json", JSON.stringify (data), "text/plain", "public-read", function (err, data) {
+		callback (err, data);
 		});
 	}
+function isNameDefined (name, callback) {
+	s3GetObjectMetadata (s3NamesPath + "/" + name + ".json", function (metadata) {
+		console.log ("isNameDefined: " + JSON.stringify (metadata));
+		callback (metadata != null);
+		});
+	}
+function getNameRecord (name, callback) {
+	s3GetObject (s3NamesPath + "/" + name + ".json", function (err, data) {
+		callback (data.Body);
+		});
+	}
+
 
 var padWithZeros = function (num, ctplaces) {
 	var s = num.toString ();
@@ -150,7 +163,7 @@ function parsePackages (s) {
 			s = s.substr (ix);
 			}
 		console.log ("\"" + path + "\" == " + htmltext.length + " characters.");
-		writeStaticFile (s3path + path, htmltext, "text/html");
+		s3NewObject (s3path + path, htmltext, "text/html");
 		}
 	}
 var handlePackagePing = function (urloutline) {
