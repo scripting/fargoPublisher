@@ -1,5 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/21/2014; 8:00:50 PM
+	//Last update: 1/21/2014; 9:52:11 PM
+
+var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
 
 var http = require ("http");
 var request = require ("request");
@@ -89,7 +91,7 @@ function parsePackages (s) {
 			s = s.substr (ix);
 			}
 		console.log ("\"" + path + "\" == " + htmltext.length + " characters.");
-		writeStaticFile ("/tmp.scripting.com/blog" + path, htmltext, "text/html");
+		writeStaticFile (s3path + path, htmltext, "text/html");
 		}
 	}
 var handlePackagePing = function (urloutline) {
