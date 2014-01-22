@@ -1,6 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/22/2014; 11:35:45 AM
+	//Last update: 1/22/2014; 11:55:36 AM
 
+var myVersion = "0.4";
 var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
@@ -245,6 +246,10 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 						}
 					});
 				}
+			break;
+		case "/version":
+			httpResponse.writeHead (200, {"Content-Type": "text/plain"});
+			httpResponse.end (myVersion);    
 			break;
 		default:
 			httpResponse.writeHead (404, {"Content-Type": "text/plain"});
