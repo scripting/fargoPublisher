@@ -1,7 +1,9 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/21/2014; 9:52:11 PM
+	//Last update: 1/21/2014; 9:54:14 PM
 
 var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
+var s3defaultType = "text/plain";
+var s3defaultAcl = "public-read";
 
 var http = require ("http");
 var request = require ("request");
@@ -20,10 +22,10 @@ var httpReadUrl = function (url, callback) {
 var writeStaticFile = function (path, data, type, acl) {
 	var bucketname = "";
 	if (type == undefined) {
-		type = "text/plain";
+		type = s3defaultType;
 		}
 	if (acl == undefined) {
-		acl = "public-read";
+		acl = s3defaultAcl;
 		}
 	
 	//split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
