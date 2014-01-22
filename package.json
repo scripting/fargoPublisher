@@ -1,19 +1,26 @@
 {
   "name": "fargoPublisher",
-  "subdomain": "fargoPub2",
+  "subdomain": "fargoPub1",
   "description": "A JavaScript project to connect to Fargo to publish a folder in Dropbox.",
+  "author": "Dave Winer <dave@smallpicture.com>",
   "version": "0.0.2",
   "scripts": {
      "start": "node publisher.js"
   },
   
   
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scripting/fargoPublisher.git"
+  },
+
  "dependencies" : {
     "aws-sdk": "*", 
     "request": "*"
   }, 
   
-  
+ "license": "MIT",
+
   
   "engines": {
     "node": "0.6.x"
