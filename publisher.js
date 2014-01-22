@@ -1,12 +1,13 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/22/2014; 6:45:46 PM
+	//Last update: 1/22/2014; 6:54:22 PM
 
-var myVersion = "0.41";
+var myVersion = "0.42";
+
 var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
+
 var s3NamesPath = "/tmp.scripting.com/names"; //where we store name records for this domain
-var myTableName = "smallpictcom";
 var myDomain = "smallpict.com";
 
 var http = require ("http");
@@ -24,7 +25,6 @@ function httpReadUrl (url, callback) {
 		});
 	
 	}
-
 function s3SplitPath (path) { //split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
 	var bucketname = "";
 	if (path.length > 0) {
@@ -106,20 +106,20 @@ function getNameRecord (name, callback) {
 	}
 
 
-var padWithZeros = function (num, ctplaces) {
+function padWithZeros (num, ctplaces) {
 	var s = num.toString ();
 	while (s.length < ctplaces) {
 		s = "0" + s;
 		}
 	return (s);
 	}
-var isAlpha = function (ch) {
+function isAlpha (ch) {
 	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
 	}
-var isNumeric = function (ch) {
+function isNumeric (ch) {
 	return ((ch >= '0') && (ch <= '9'));
 	}
-var cleanName = function (name) {
+function cleanName (name) {
 	var s = "";
 	for (var i = 0; i < name.length; i++) {
 		var ch = name [i];
@@ -129,7 +129,7 @@ var cleanName = function (name) {
 		}
 	return (s.toLowerCase (s));
 	}
-var scrapeTagValue = function (sourcestring, tagname) {
+function scrapeTagValue (sourcestring, tagname) {
 	var s = sourcestring; //work with a copy
 	var opentag = "<" + tagname + ">", closetag = "</" + tagname + ">";
 	var ix = s.indexOf (opentag);
@@ -166,7 +166,7 @@ function parsePackages (s) {
 		s3NewObject (s3path + path, htmltext, "text/html");
 		}
 	}
-var handlePackagePing = function (urloutline) {
+function handlePackagePing (urloutline) {
 	console.log ("handlePackagePing: " + urloutline);
 	httpReadUrl (urloutline, function (httptext) {
 		var urlpackage = scrapeTagValue (httptext, "linkHosting");
@@ -178,8 +178,8 @@ var handlePackagePing = function (urloutline) {
 		});
 	}
 
-console.log ("starting server");
-var counter = 0;
+console.log ("Fargo Publisher server v" + myVersion);
+
 var server = http.createServer (function (httpRequest, httpResponse) {
 	console.log (httpRequest.url);
 	
