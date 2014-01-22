@@ -1,15 +1,18 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/21/2014; 9:54:14 PM
+	//Last update: 1/21/2014; 10:47:28 PM
 
 var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
+var myTableName = "smallpictcom";
+var myDomain = "smallpict.com";
 
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
+var db = new AWS.DynamoDB ();
 
 var httpReadUrl = function (url, callback) {
 	request (url, function (error, response, body) {
@@ -47,6 +50,25 @@ var writeStaticFile = function (path, data, type, acl) {
 		};
 	s3.putObject (params, function (err, data) { 
 		console.log ("Wrote: http://" + bucketname + "/" + path);
+		});
+	}
+var getNameRecord = function (recordkey, callback) { //if looking up dave.smallpict.com info, recordkey == dave
+	var params = {
+		TableName: myTableName,
+		AttributesToGet: [
+			"opmlUrl", "packageUrl", "whenCreated"
+			],
+		Key: {
+			name: {"S": recordkey}
+			}
+		}
+	db.getItem (params, function (err, data) {
+		callback (data);
+		});
+	}
+var isNameDefined = function (recordkey, callback) {
+	getNameRecord (recordkey, function (data) {
+		callback (data.Item != undefined);
 		});
 	}
 var padWithZeros = function (num, ctplaces) {
@@ -126,6 +148,35 @@ var server = http.createServer (function (request, response) {
 			response.end (s);    
 			
 			break;
+		case "/isnameavailable":
+			var name = parsedUrl.query.name;
+			
+			response.writeHead (200, {"Content-Type": "text/html"});
+			
+			if (name.length == 0) {
+				response.end ("");    
+				}
+			else {
+				if (name.length < 4) {
+					response.end ("Name must be 4 or more characters.");
+					}
+				else {
+					isNameDefined (name, function (fldefined) {
+						var color, answer;
+						if (fldefined) {
+							color = "red";
+							answer = "is not";
+							}
+						else {
+							color = "green";
+							answer = "is";
+							}
+						response.end ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
+						});
+					}
+				}
+			
+			break
 		default:
 			response.writeHead (404, {"Content-Type": "text/plain"});
 			response.end ("404 Not Found");
