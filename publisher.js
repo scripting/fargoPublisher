@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 1:51:17 PM Eastern.
+	//Last update: 1/23/2014; 2:01:03 PM Eastern.
 
-var myVersion = "0.52";
+var myVersion = "0.53";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -200,7 +200,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 	
 	switch (parsedUrl.pathname.toLowerCase ()) {
 		case "/pingpackage":
-			httpResponse.writeHead (200, {"Content-Type": "application/json"});
+			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
 			
 			handlePackagePing (parsedUrl.query.link);
 			
@@ -212,7 +212,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 		case "/isnameavailable":
 			var name = cleanName (parsedUrl.query.name);
 			
-			httpResponse.writeHead (200, {"Content-Type": "text/html"});
+			httpResponse.writeHead (200, {"Content-Type": "text/html", "Access-Control-Allow-Origin": "fargo.io"});
 			
 			if (name.length == 0) {
 				httpResponse.end ("");    
@@ -243,7 +243,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 			
 			console.log ("Create new outline name: " + recordkey + ", url=" + url);
 			
-			httpResponse.writeHead (200, {"Content-Type": "application/json"});
+			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
 			
 			if (url == undefined) {
 				var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
@@ -275,7 +275,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 			break;
 		case "/geturlfromname":
 			var name = cleanName (parsedUrl.query.name);
-			httpResponse.writeHead (200, {"Content-Type": "application/json"});
+			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
 			getNameRecord (name, function (jsontext) {
 				if (jsontext == null) {
 					var x = {flError: true, errorString: "Can't open the outline named '" + name + "' because there is no outline with that name."};
@@ -289,11 +289,11 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 				});
 			break;
 		case "/version":
-			httpResponse.writeHead (200, {"Content-Type": "text/plain"});
+			httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
 			httpResponse.end (myVersion);    
 			break;
 		default:
-			httpResponse.writeHead (404, {"Content-Type": "text/plain"});
+			httpResponse.writeHead (404, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
 			httpResponse.end ("404 Not Found");
 			break;
 		}
