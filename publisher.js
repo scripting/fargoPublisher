@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 11:50:19 AM Eastern.
+	//Last update: 1/23/2014; 12:09:43 PM Eastern.
 
-var myVersion = "0.45";
+var myVersion = "0.48";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the files we create
 var s3defaultType = "text/plain";
@@ -102,7 +102,7 @@ function isNameDefined (name, callback) {
 		});
 	}
 function getNameRecord (name, callback) {
-	s3GetObject (s3NamesPath + "/" + name + ".json", function (err, data) {
+	s3GetObject (s3NamesPath + "/" + name + ".json", function (data) {
 		callback (data.Body);
 		});
 	}
@@ -145,7 +145,7 @@ function scrapeTagValue (sourcestring, tagname) {
 		}
 	return ("");
 	}
-function parsePackages (s) {
+function parsePackages (name, s) { //name is something like "dave"
 	var magicpattern = "<[{~#--- ", ix, path, htmltext;
 	while (s.length > 0) {
 		ix = s.indexOf (magicpattern);
@@ -170,20 +170,29 @@ function parsePackages (s) {
 			if (path [0] == "/") { //delete leading slash, if present
 				path = path.substr (1);
 				}
-			s3NewObject (s3HostingPath + path, htmltext, "text/html");
+			s3NewObject (s3HostingPath + name + "/" + path, htmltext, "text/html");
 			}
 		}
 	}
-function handlePackagePing (urloutline) {
-	console.log ("handlePackagePing: " + urloutline);
-	httpReadUrl (urloutline, function (httptext) {
-		var urlpackage = scrapeTagValue (httptext, "linkHosting");
-		console.log ("package url: " + urlpackage);
-		httpReadUrl (urlpackage, function (packagetext) {
-			console.log ("package text: " + packagetext.length + " chars.");
-			parsePackages (packagetext);
+function handlePackagePing (subdomain) { //something like dave.smallpict.com
+	var sections = subdomain.split (".");
+	var name = sections [0];
+	
+	console.log ("handlePackagePing: " + name);
+	
+	getNameRecord (name, function (jsontext) {
+		var obj = JSON.parse (jsontext);
+		console.log ("handlePackagePing: jsontext == " + jsontext);
+		httpReadUrl (obj.opmlUrl, function (httptext) {
+			var urlpackage = scrapeTagValue (httptext, "linkHosting");
+			console.log ("handlePackagePing: package url == " + urlpackage);
+			httpReadUrl (urlpackage, function (packagetext) {
+				console.log ("package text: " + packagetext.length + " chars.");
+				parsePackages (name, packagetext);
+				});
 			});
 		});
+	
 	}
 
 console.log ("Fargo Publisher server v" + myVersion);
@@ -197,9 +206,9 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 		case "/pingpackage":
 			httpResponse.writeHead (200, {"Content-Type": "application/json"});
 			
-			handlePackagePing (parsedUrl.query.link);
+			handlePackagePing (parsedUrl.query.name);
 			
-			var x = {"url": parsedUrl.query.link};
+			var x = {"name": parsedUrl.query.name};
 			var s = "getData (" + JSON.stringify (x) + ")";
 			httpResponse.end (s);    
 			
