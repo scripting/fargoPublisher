@@ -22,9 +22,9 @@ So if I call my outline "dave" -- you can refer to it as dave.smallpict.com.
 
 When you go to that address, you get an OPML file that contains my outline.
 
-There's only one element of the &lt;head> section of that outline that we care about, &lt;xxx>. 
+There's only one element of the &lt;head> section of that outline that we care about, &lt;linkHosting>. It's automatically maintained by Fargo. 
 
-The rest of it is entirely up to the user. (And that head element is automatically put in the file by Fargo when the user chooses to name the outline).
+The rest of the outline contents is  up to the user.
 
 
 
