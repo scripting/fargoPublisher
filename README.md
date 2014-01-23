@@ -18,15 +18,25 @@ You must have a current node.js installation.
 
 Install request, AWS and if necessary url. 
 
-Set environment variables for AWS: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY.
+Set environment variables for AWS.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AWS_ACCESS_KEY_ID
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AWS_SECRET_ACCESS_KEY
+
+
 
 Set environment variables with your S3 paths.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;xxx
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpStoragePath -- where the users' files will be stored.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;yyy
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpNamesPath -- where the names files will be stored. 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDomain -- the domain we're allocating (should be set, via DNS and AWS, to point to fpStoragePath).
 
 
+
+The app is in package.js. package.json already contains all the info that node needs to run it.
 
 
 
@@ -41,6 +51,8 @@ Import data from smallpict.com.
 Fix the pingpackage call to use the name not the url of the outline.
 
 How do we backup the database?
+
+Need to be smarter about file types -- should HTML files really be text/plain type? 
 
 
 
