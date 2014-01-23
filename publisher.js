@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 12:56:24 PM Eastern.
+	//Last update: 1/23/2014; 1:00:44 PM Eastern.
 
-var myVersion = "0.49";
+var myVersion = "0.50";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -56,7 +56,7 @@ function s3NewObject (path, data, type, acl, callback) {
 		Key: splitpath.Key
 		};
 	s3.putObject (params, function (err, data) { 
-		console.log ("s3NewObject: http://" + splitpath.Bucket + "/" + path);
+		console.log ("s3NewObject: http://" + splitpath.Bucket + "/" + splitpath.Key);
 		if (callback != undefined) {
 			callback (err, data);
 			}
