@@ -10,3 +10,17 @@ This document includes information you need to install this server, and technica
 
 
 
+### Todo list
+
+Parameterize using environment variables. See <a href="http://stackoverflow.com/questions/4870328/how-to-read-environment-variable-in-node-js">howto</a>.
+
+Determine the S3 buckets to use for the Fargo 2 beta deploy.
+
+Import data from smallpict.com.
+
+Fix the pingpackage call to use the name not the url of the outline.
+
+How do we backup the database?
+
+
+
