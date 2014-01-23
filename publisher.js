@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 1:38:07 PM Eastern.
+	//Last update: 1/23/2014; 1:51:17 PM Eastern.
 
-var myVersion = "0.51";
+var myVersion = "0.52";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -169,8 +169,9 @@ function parsePackages (name, s) { //name is something like "dave"
 			}
 		}
 	}
-function handlePackagePing (subdomain) { //something like dave.smallpict.com
-	var sections = subdomain.split (".");
+function handlePackagePing (subdomain) { //something like http://dave.smallpict.com/
+	var parsedUrl = urlpack.parse (subdomain, true);
+	var sections = parsedUrl.host.split (".");
 	var name = sections [0];
 	
 	console.log ("handlePackagePing: " + name);
@@ -201,9 +202,9 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 		case "/pingpackage":
 			httpResponse.writeHead (200, {"Content-Type": "application/json"});
 			
-			handlePackagePing (parsedUrl.query.name);
+			handlePackagePing (parsedUrl.query.link);
 			
-			var x = {"name": parsedUrl.query.name};
+			var x = {"url": parsedUrl.query.link};
 			var s = "getData (" + JSON.stringify (x) + ")";
 			httpResponse.end (s);    
 			
