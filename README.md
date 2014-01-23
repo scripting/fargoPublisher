@@ -16,7 +16,7 @@ This document includes information you need to install a server, and technical i
 
 You must have a current node.js installation.
 
-Install request, AWS and if necessary url. 
+Install <a href="https://github.com/mikeal/request">request</a>, <a href="http://aws.amazon.com/sdkfornodejs/">AWS</a> and if necessary <a href="http://nodejs.org/api/url.html">url</a>. 
 
 Set environment variables for AWS.
 
