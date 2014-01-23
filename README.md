@@ -18,7 +18,7 @@ Each outline can be given a public name.
 
 Rather than invent our own naming system, we're using the Internet's -- DNS.
 
-So if I call my outline "dave" -- you can refer to it as dave.smallpict.com.
+So if I call my outline "dave" -- you can refer to it as <a href="http://dave.smallpict.com/">dave.smallpict.com</a>.
 
 When you go to that address, you get the rendered content. 
 
