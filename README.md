@@ -1,12 +1,30 @@
 ### What is Fargo Publisher?
 
-A JavaScript project to connect to <a href="http://fargo.io/">Fargo</a> to publish a folder of HTML docs.
+Fargo Publisher is a node.js app that connects to <a href="http://fargo.io/">Fargo</a> to publish a folder of HTML docs.
 
 An upcoming release of Fargo has a new built-in content management system that creates static HTML files. All that's needed is a way to flow those files to a static HTTP server. That's what Fargo Publisher does. 
 
-It establishes a very simple set of calls that Fargo implements to connect up to a storage server. This implementation stores the files in Amazon S3, but a fork of this code could store them in files, or in another content server. 
+It defines an open protocol that any app can use to connect to static storage, no matter where the content originates. This implementation stores the files in Amazon S3, but a fork of this project could store them in files, or in another content server. 
 
-This document includes information you need to install this server, and technical information for implementers.
+It's open source, using the MIT License. 
+
+This document includes information you need to install a server, and technical information for implementers.
+
+
+
+### How to deploy
+
+You must have a current node.js installation.
+
+Install request, AWS and if necessary url. 
+
+Set environment variables for AWS: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY.
+
+Set environment variables with your S3 paths.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 

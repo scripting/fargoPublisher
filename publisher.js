@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 9:36:37 AM Eastern.
+	//Last update: 1/23/2014; 9:43:49 AM Eastern.
 
 var myVersion = "0.43";
 
@@ -15,7 +15,6 @@ var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
-var db = new AWS.DynamoDB ();
 
 function httpReadUrl (url, callback) {
 	request (url, function (error, response, body) {
