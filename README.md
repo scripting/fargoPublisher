@@ -34,7 +34,7 @@ The Fargo user brings the outline he or she wants to make public to the front.
 
 Choose the <i>Name Outline</i> command in the File menu.
 
-A dialog appears.
+A <a href="http://static.scripting.com/larryKing/images/2013/05/14/choosePublicName.gif">dialog</a> appears.
 
 Type a name. While you do the software tells you whether the name is taken. It does this with a call to Fargo Publisher.
 
