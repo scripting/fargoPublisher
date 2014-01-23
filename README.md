@@ -132,6 +132,8 @@ Need to be smarter about file types -- should HTML files really be text/plain ty
 
 ### Done
 
+Come up with a cname for fargopub1.jit.su. (pub.fargo.io)
+
 Create beta.fargo.io.
 
 Parameterize using environment variables. See <a href="http://stackoverflow.com/questions/4870328/how-to-read-environment-variable-in-node-js">howto</a>.
