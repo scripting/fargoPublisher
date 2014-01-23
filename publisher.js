@@ -1,23 +1,21 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 11:29:19 AM Eastern.
+	//Last update: 1/22/2014; 9:02:47 PM Eastern.
 
-var myVersion = "0.44";
+var myVersion = "0.42";
 
-var s3HostingPath = process.env.fpHostingPath; //where we store all the files we create
+var s3path = "/tmp.scripting.com/blog"; //where we store all the files we create
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
 
-var s3DataPath = process.env.fpDataPath;
-var s3NamesPath = s3DataPath + "names/"; 
-var s3StatsPath = s3DataPath + "stats/"; 
-
-var myDomain = process.env.fpDomain;
+var s3NamesPath = "/tmp.scripting.com/names"; //where we store name records for this domain
+var myDomain = "smallpict.com";
 
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
+var db = new AWS.DynamoDB ();
 
 function httpReadUrl (url, callback) {
 	request (url, function (error, response, body) {
@@ -165,7 +163,7 @@ function parsePackages (s) {
 			s = s.substr (ix);
 			}
 		console.log ("\"" + path + "\" == " + htmltext.length + " characters.");
-		s3NewObject (s3HostingPath + path, htmltext, "text/html");
+		s3NewObject (s3path + path, htmltext, "text/html");
 		}
 	}
 function handlePackagePing (urloutline) {
