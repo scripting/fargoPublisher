@@ -120,23 +120,27 @@ The app is in package.js. package.json already contains all the info that node n
 
 ### Todo list
 
-Create beta.fargo.io.
-
-Parameterize using environment variables. See <a href="http://stackoverflow.com/questions/4870328/how-to-read-environment-variable-in-node-js">howto</a>.
-
 User interface in Fargo.
 
 When you go to dave.smallpict.com, the OPML is displayed.
+
+How do we backup the database?
+
+Need to be smarter about file types -- should HTML files really be text/plain type? 
+
+
+
+### Done
+
+Create beta.fargo.io.
+
+Parameterize using environment variables. See <a href="http://stackoverflow.com/questions/4870328/how-to-read-environment-variable-in-node-js">howto</a>.
 
 Determine the S3 buckets to use for the Fargo 2 beta deploy.
 
 Import data from smallpict.com.
 
 Fix the pingpackage call to use the name not the url of the outline.
-
-How do we backup the database?
-
-Need to be smarter about file types -- should HTML files really be text/plain type? 
 
 
 
