@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 1:08:58 PM Eastern.
+	//Last update: 1/23/2014; 1:38:07 PM Eastern.
 
-var myVersion = "0.50";
+var myVersion = "0.51";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -93,7 +93,12 @@ function isNameDefined (name, callback) {
 	}
 function getNameRecord (name, callback) {
 	s3GetObject (s3NamesPath + "/" + name + ".json", function (data) {
-		callback (data.Body);
+		if (data == null) {
+			callback (null);
+			}
+		else {
+			callback (data.Body);
+			}
 		});
 	}
 
@@ -266,6 +271,21 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 						}
 					});
 				}
+			break;
+		case "/geturlfromname":
+			var name = cleanName (parsedUrl.query.name);
+			httpResponse.writeHead (200, {"Content-Type": "application/json"});
+			getNameRecord (name, function (jsontext) {
+				if (jsontext == null) {
+					var x = {flError: true, errorString: "Can't open the outline named '" + name + "' because there is no outline with that name."};
+					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+					}
+				else {
+					var obj = JSON.parse (jsontext);
+					var x = {flError: false, url: obj.opmlUrl};
+					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+					}
+				});
 			break;
 		case "/version":
 			httpResponse.writeHead (200, {"Content-Type": "text/plain"});
