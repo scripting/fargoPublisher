@@ -78,13 +78,15 @@ You're going to need to make a few decisions before you deploy.
 
 3. What domain for the user names? You have to own the domain and the DNS should point to the node server so it can redirect to the user's content when subdomains are accessed.
 
-For my deployment, for the initial Fargo 2 beta testers, I went with: /beta.fargo.io/users/.
+For my deployment I went with (Unix shell commands):
 
-I am storing the names in /beta.fargo.io/names/. 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. export fpHostingPath=/beta.fargo.io/users/
 
-The domain I'm using is smallpict.com. All the names from the previous CMS have been ported and should still work. 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. export fpDataPath=/beta.fargo.io/data/
 
-All these values will be stored in "environment variables" for the node.js application.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. export fpDomain=smallpict.com
+
+
 
 
 
@@ -104,7 +106,7 @@ Set environment variables for AWS.
 
 Set environment variables with your S3 paths.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpStoragePath -- where the users' files will be stored.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpHostingPath -- where the users' files will be stored.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDataPath -- where you want names and stats to be stored. 
 
@@ -117,6 +119,8 @@ The app is in package.js. package.json already contains all the info that node n
 
 
 ### Todo list
+
+Create beta.fargo.io.
 
 Parameterize using environment variables. See <a href="http://stackoverflow.com/questions/4870328/how-to-read-environment-variable-in-node-js">howto</a>.
 
