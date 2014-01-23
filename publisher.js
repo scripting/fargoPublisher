@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 4:28:45 PM Eastern.
+	//Last update: 1/23/2014; 5:17:48 PM Eastern.
 
-var myVersion = "0.54"; 
+var myVersion = "0.55"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -27,7 +27,7 @@ function httpReadUrl (url, callback) {
 		});
 	
 	}
-function s3SplitPath (path) { //split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
+function s3SplitPath (path) { //split path like this: /tmp.scripting.com/testing/one.txt -- into bucketname and path.
 	var bucketname = "";
 	if (path.length > 0) {
 		if (path [0] == "/") { //delete the slash
@@ -47,7 +47,6 @@ function s3NewObject (path, data, type, acl, callback) {
 	if (acl == undefined) {
 		acl = s3defaultAcl;
 		}
-	
 	var params = {
 		ACL: acl,
 		ContentType: type,
@@ -75,7 +74,7 @@ function s3GetObject (path, callback) {
 		});
 	}
 
-function addNameRecord (name, opmlUrl, callback) { //add "dave" to give the name dave.smallpict.com to the outline
+function addNameRecord (name, opmlUrl, callback) { 
 	var data = {
 		"name": name,
 		"opmlUrl": opmlUrl,
@@ -87,7 +86,6 @@ function addNameRecord (name, opmlUrl, callback) { //add "dave" to give the name
 	}
 function isNameDefined (name, callback) {
 	s3GetObjectMetadata (s3NamesPath + "/" + name + ".json", function (metadata) {
-		console.log ("isNameDefined: " + JSON.stringify (metadata));
 		callback (metadata != null);
 		});
 	}
@@ -173,9 +171,6 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	var parsedUrl = urlpack.parse (subdomain, true);
 	var sections = parsedUrl.host.split (".");
 	var name = sections [0];
-	
-	console.log ("handlePackagePing: " + name);
-	
 	getNameRecord (name, function (jsontext) {
 		var obj = JSON.parse (jsontext);
 		console.log ("handlePackagePing: jsontext == " + jsontext);
@@ -188,7 +183,6 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 				});
 			});
 		});
-	
 	}
 
 console.log ("Fargo Publisher server v" + myVersion);
