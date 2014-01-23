@@ -1,15 +1,15 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 11:40:54 AM Eastern.
+	//Last update: 1/23/2014; 11:50:19 AM Eastern.
 
-var myVersion = "0.44";
+var myVersion = "0.45";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the files we create
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
 
 var s3DataPath = process.env.fpDataPath;
-var s3NamesPath = s3DataPath + "names/"; 
-var s3StatsPath = s3DataPath + "stats/"; 
+var s3NamesPath = s3DataPath + "names"; 
+var s3StatsPath = s3DataPath + "stats"; 
 
 var myDomain = process.env.fpDomain;
 
@@ -165,7 +165,13 @@ function parsePackages (s) {
 			s = s.substr (ix);
 			}
 		console.log ("\"" + path + "\" == " + htmltext.length + " characters.");
-		s3NewObject (s3HostingPath + path, htmltext, "text/html");
+		
+		if (path.length > 0) {
+			if (path [0] == "/") { //delete leading slash, if present
+				path = path.substr (1);
+				}
+			s3NewObject (s3HostingPath + path, htmltext, "text/html");
+			}
 		}
 	}
 function handlePackagePing (urloutline) {
