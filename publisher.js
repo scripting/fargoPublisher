@@ -1,9 +1,9 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 12:09:43 PM Eastern.
+	//Last update: 1/23/2014; 12:13:17 PM Eastern.
 
 var myVersion = "0.48";
 
-var s3HostingPath = process.env.fpHostingPath; //where we store all the files we create
+var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
 
@@ -11,7 +11,7 @@ var s3DataPath = process.env.fpDataPath;
 var s3NamesPath = s3DataPath + "names"; 
 var s3StatsPath = s3DataPath + "stats"; 
 
-var myDomain = process.env.fpDomain;
+var myDomain = process.env.fpDomain; //something like smallpict.com
 
 var http = require ("http");
 var request = require ("request");
