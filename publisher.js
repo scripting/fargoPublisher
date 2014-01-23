@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 12:13:17 PM Eastern.
+	//Last update: 1/23/2014; 12:56:24 PM Eastern.
 
-var myVersion = "0.48";
+var myVersion = "0.49";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -40,7 +40,7 @@ function s3SplitPath (path) { //split path into bucketname and path -- like this
 	return ({Bucket: bucketname, Key: path});
 	}
 function s3NewObject (path, data, type, acl, callback) {
-	var bucketname = "";
+	var splitpath = s3SplitPath (path);
 	if (type == undefined) {
 		type = s3defaultType;
 		}
@@ -48,25 +48,15 @@ function s3NewObject (path, data, type, acl, callback) {
 		acl = s3defaultAcl;
 		}
 	
-	//split path into bucketname and path -- like this: /tmp.scripting.com/testing/one.txt
-		if (path.length > 0) {
-			if (path [0] == "/") { //delete the slash
-				path = path.substr (1); 
-				}
-			var ix = path.indexOf ("/");
-			bucketname = path.substr (0, ix);
-			path = path.substr (ix + 1);
-			}
-	
 	var params = {
 		ACL: acl,
 		ContentType: type,
 		Body: data,
-		Bucket: bucketname,
-		Key: path
+		Bucket: splitpath.Bucket,
+		Key: splitpath.Key
 		};
 	s3.putObject (params, function (err, data) { 
-		console.log ("s3NewObject: http://" + bucketname + "/" + path);
+		console.log ("s3NewObject: http://" + splitpath.Bucket + "/" + path);
 		if (callback != undefined) {
 			callback (err, data);
 			}
