@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 2:01:03 PM Eastern.
+	//Last update: 1/23/2014; 4:20:15 PM Eastern.
 
-var myVersion = "0.53";
+var myVersion = "0.54";
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -210,16 +210,20 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 			
 			break;
 		case "/isnameavailable":
+			function sendStringBack (s) {
+				var x = {"message": s};
+				httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+				}
+			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+			
 			var name = cleanName (parsedUrl.query.name);
 			
-			httpResponse.writeHead (200, {"Content-Type": "text/html", "Access-Control-Allow-Origin": "fargo.io"});
-			
 			if (name.length == 0) {
-				httpResponse.end ("");    
+				sendStringBack ("");    
 				}
 			else {
 				if (name.length < 4) {
-					httpResponse.end ("Name must be 4 or more characters.");
+					sendStringBack ("Name must be 4 or more characters.");
 					}
 				else {
 					isNameDefined (name, function (fldefined) {
@@ -232,7 +236,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 							color = "green";
 							answer = "is";
 							}
-						httpResponse.end ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
+						sendStringBack ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
 						});
 					}
 				}
