@@ -1,4 +1,12 @@
-fargoPublisher
-==============
+### What is Fargo Publisher?
 
-A JavaScript project to connect to Fargo to publish a folder in Dropbox.
+A JavaScript project to connect to <a href="http://fargo.io/">Fargo</a> to publish a folder of HTML docs.
+
+An upcoming release of Fargo has a new built-in content management system that creates static HTML files. All that's needed is a way to flow those files to a static HTTP server. That's what Fargo Publisher does. 
+
+It establishes a very simple set of calls that Fargo implements to connect up to a storage server. This implementation stores the files in Amazon S3, but a fork of this code could store them in files, or in another content server. 
+
+This document includes information you need to install this server, and technical information for implementers.
+
+
+
