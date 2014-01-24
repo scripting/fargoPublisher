@@ -8,7 +8,7 @@
      "start": "node publisher.js"
      },
   "domains": [
-     "pub.fargo.io"
+     "smallpict.com"
      ],
   "repository": {
     "type": "git",

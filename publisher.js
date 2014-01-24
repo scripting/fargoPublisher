@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 12:27:42 PM Eastern.
+	//Last update: 1/24/2014; 5:46:46 PM Eastern.
 
-var myVersion = "0.60"; 
+var myVersion = "0.62"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -74,15 +74,20 @@ function s3GetObject (path, callback) {
 		});
 	}
 
+function updateNameRecord (name, obj, callback) { 
+	s3NewObject (s3NamesPath + "/" + name + ".json", JSON.stringify (obj, undefined, 3), "text/plain", "public-read", function (err, data) {
+		if (callback != undefined) {
+			callback (err, data);
+			}
+		});
+	}
 function addNameRecord (name, opmlUrl, callback) { 
 	var data = {
 		"name": name,
 		"opmlUrl": opmlUrl,
 		"whenCreated": new Date ().toString ()
 		};
-	s3NewObject (s3NamesPath + "/" + name + ".json", JSON.stringify (data), "text/plain", "public-read", function (err, data) {
-		callback (err, data);
-		});
+	updateNameRecord (name, data, callback);
 	}
 function isNameDefined (name, callback) {
 	s3GetObjectMetadata (s3NamesPath + "/" + name + ".json", function (metadata) {
@@ -99,7 +104,6 @@ function getNameRecord (name, callback) {
 			}
 		});
 	}
-
 
 function padWithZeros (num, ctplaces) {
 	var s = num.toString ();
@@ -170,12 +174,19 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	var parsedUrl = urlpack.parse (subdomain, true);
 	var sections = parsedUrl.host.split (".");
 	var name = sections [0];
+	
+	console.log ("handlePackagePing: " + name);
+	
 	getNameRecord (name, function (jsontext) {
 		var obj = JSON.parse (jsontext);
 		httpReadUrl (obj.opmlUrl, function (httptext) {
 			var urlpackage = scrapeTagValue (httptext, "linkHosting");
 			httpReadUrl (urlpackage, function (packagetext) {
 				parsePackages (name, packagetext);
+				
+				obj.whenLastUpdate = new Date ().toString ();
+				obj.urlRedirect = "http:/" + s3HostingPath + name + "/"; 
+				updateNameRecord (name, obj);
 				});
 			});
 		});
