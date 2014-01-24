@@ -36,9 +36,9 @@ Choose the <i>Name Outline</i> command in the File menu.
 
 A <a href="http://static.scripting.com/larryKing/images/2013/05/14/choosePublicName.gif">dialog</a> appears.
 
-Type a name. While you do the software tells you whether the name is taken. It does this with a call to Fargo Publisher.
+Type a name. As you type the software tells you whether the name is taken. It does this with a call to Fargo Publisher.
 
-When you click OK, a message is sent to Fargo Publisher to associate that name with the public URL of the outline. Getting a public URL for a file is a feature of Dropbox that we're using.
+When you click OK, a message is sent to Fargo Publisher to associate that name with the public URL of the outline. Getting a public URL for a file is a feature of Dropbox.
 
 
 
@@ -46,11 +46,11 @@ When you click OK, a message is sent to Fargo Publisher to associate that name w
 
 When the user publishes an outline, or a portion of an outline, it could cause many files to be rendered. 
 
-The text of those files is saved to a package file, which is linked into the user's outline, automatically by the CMS.
+The text of those files is saved to a <i>package</i> file, which is linked into the user's outline, automatically by the CMS.
 
-When the text is fully rendered, it sends a message to the Fargo Publisher server with the name of the outline.
+When the text is fully rendered, it sends a message to the Publisher server with the name of the outline.
 
-Publisher then reads the outline (it was registered in the previous ste) locates the package file, reads it, and breaks the package up into its component files and saves it the user's folder in the S3 bucket. 
+Publisher then reads the outline (it was registered in the previous step) locates the package file, reads it, breaks the package up into its component files and saves them to the user's folder in the S3 bucket. 
 
 Publisher sends back to Fargo the base URL of the folder, which is then hooked into the Eye icon, which can be used to view the headline the cursor points to.
 
@@ -62,7 +62,7 @@ The Eye icon in the left margin of Fargo is super-important.
 
 It connects the editing context with the viewing context.
 
-Put the cursor on any headline in a public outline, and click the Eye.
+Put the cursor on any headline in a public outline, and click the <a href="http://static.scripting.com/larryKing/images/2014/01/23/theAllImportantEye.gif">Eye</a>.
 
 A new tab opens with the rendered view of that section of the outline.
 
@@ -124,7 +124,7 @@ There's a folder of OPML files that contains the outlines that the JS and MD com
 
 We use the MIT License. Nothing proprietary about the protocol or the code. You are encouraged to clone, innovate, enjoy.
 
-I love programming in this mode. The tools are great, and node is a wonderful environment, made that way by programmers who share their work so generously. The quality of the work is very impressive. And the committment to no breakage also refreshing in this day and age. 
+I love programming in this mode. The tools are great, and node is a wonderful environment, made that way by programmers who share their work so generously. The quality of the work is very impressive. And the commitment to no breakage also refreshing in this day and age. 
 
 Thanks to Brent Simmons for his Hello World server <a href="http://inessential.com/2013/12/09/getting_started_with_node_js_for_cocoa_">example</a>. They helped this node newbie get started. He says his example is for Cocoa developers, but that's not true. I understood it, and I've never written a line of Cocoa in my life, and think it's a silly name for a programming environment. ;-)
 
