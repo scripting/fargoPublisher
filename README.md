@@ -118,7 +118,7 @@ The app is in package.js. package.json already contains all the info that node n
 
 
 
-### Details
+### Notes
 
 There's a folder of OPML files that contains the outlines that the JS and MD come from.
 
@@ -132,7 +132,7 @@ Thanks to Brent Simmons for his Hello World server <a href="http://inessential.c
 
 ### Todo list
 
-When you go to dave.smallpict.com, the OPML is displayed.
+When you go to dave.smallpict.com, the rendered website is displayed or the OPML. A choice must be made.
 
 How do we backup the database?
 
