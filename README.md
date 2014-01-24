@@ -1,4 +1,4 @@
-### What is Fargo Publisher?
+### What is Fargo Publisher? 
 
 Fargo Publisher is a node.js app that connects to <a href="http://fargo.io/">Fargo</a> to publish a folder of HTML docs.
 
@@ -86,6 +86,8 @@ For my deployment I went with (Unix shell commands):
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. export fpDomain=smallpict.com
 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. export fpServerPort=1337
+
 
 
 
@@ -131,6 +133,16 @@ Thanks to Brent Simmons for his Hello World server <a href="http://inessential.c
 
 
 ### Todo list
+
+I had to not use the CNAME in testing yesterday. Verify that it works.
+
+Make the port a configurable option.
+
+Stats!
+
+"This type of response MUST NOT have a body. Ignoring data passed to end()."
+
+Clean up console log. Too noisy.
 
 When you go to dave.smallpict.com, the rendered website is displayed or the OPML. A choice must be made.
 

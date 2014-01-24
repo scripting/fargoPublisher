@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/23/2014; 9:23:27 PM Eastern.
+	//Last update: 1/24/2014; 10:59:12 AM Eastern.
 
-var myVersion = "0.55"; 
+var myVersion = "0.56"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -12,6 +12,7 @@ var s3NamesPath = s3DataPath + "names";
 var s3StatsPath = s3DataPath + "stats"; 
 
 var myDomain = process.env.fpDomain; //something like smallpict.com
+var myPort = process.env.fpServerPort; //what port should the server run on?
 
 var http = require ("http");
 var request = require ("request");
@@ -296,4 +297,8 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 			break;
 		}
 	});
-server.listen (1337);
+
+if (myPort == undefined) {
+	myPort = 80;
+	}
+server.listen (myPort);
