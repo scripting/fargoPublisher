@@ -6,23 +6,20 @@
   "version": "0.0.2",
   "scripts": {
      "start": "node publisher.js"
-  },
-  
-  
+     },
+  "domains": [
+     "pub.fargo.io"
+     ],
   "repository": {
     "type": "git",
     "url": "https://github.com/scripting/fargoPublisher.git"
-  },
-
- "dependencies" : {
+    },
+  "dependencies" : {
     "aws-sdk": "*", 
     "request": "*"
-  }, 
-  
- "license": "MIT",
-
-  
+    }, 
+  "license": "MIT",
   "engines": {
     "node": "0.6.x"
+    }
   }
-}

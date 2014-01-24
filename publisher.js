@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 11:54:56 AM Eastern.
+	//Last update: 1/24/2014; 12:07:31 PM Eastern.
 
 var myVersion = "0.58"; 
 

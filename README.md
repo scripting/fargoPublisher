@@ -130,13 +130,21 @@ We use the MIT License. Nothing proprietary about the protocol or the code. You 
 
 I love programming in this mode. The tools are great, and node is a wonderful environment, made that way by programmers who share their work so generously. The quality of the work is very impressive. And the commitment to no breakage also refreshing in this day and age. 
 
-Thanks to Brent Simmons for his Hello World server <a href="http://inessential.com/2013/12/09/getting_started_with_node_js_for_cocoa_">example</a>. They helped this node newbie get started. He says his example is for Cocoa developers, but that's not true. I understood it, and I've never written a line of Cocoa in my life, and think it's a silly name for a programming environment. ;-)
+Thanks to Brent Simmons for his Hello World server <a href="http://inessential.com/2013/12/09/getting_started_with_node_js_for_cocoa_">example</a>. It helped this node newbie get started. He says his example is for Cocoa developers, but that's not true. I understood it, and I've never written a line of Cocoa in my life, and think it's a silly name for a programming environment. ;-)
 
 
 
 ### Todo list
 
-I had to not use the CNAME in testing yesterday. Verify that it works.
+I had to <i>not</i> use the CNAME in testing yesterday. 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The name is pub.fargo.io -- and when I tested it today it didn't work.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Doing a little <a href="https://www.nodejitsu.com/documentation/features/dns/">research</a> on Nodejitsu, they have a custom field in the package.json file, "domains" -- that apparently is where you can specify alternate names for your "drone."
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Let's see if it works...
+
+
 
 Stats!
 
