@@ -104,13 +104,13 @@ Set environment variables for AWS.
 
 
 
-Set environment variables with your S3 paths.
+Set environment variables with your S3 paths and the domain you're using.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpHostingPath -- where the users' files will be stored.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDataPath -- where you want names and stats to be stored. 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDomain -- the domain we're allocating (should be set, via DNS and AWS, to point to fpStoragePath).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDomain -- the domain we're allocating (should be set, via DNS and AWS, where it should point is still TBD).
 
 
 
@@ -133,6 +133,8 @@ Thanks to Brent Simmons for his Hello World server <a href="http://inessential.c
 ### Todo list
 
 When you go to dave.smallpict.com, the rendered website is displayed or the OPML. A choice must be made.
+
+Related question -- where to point the fpDomain environment variable. Where ever it points must be ready to redirect, based on the choice we make, above.
 
 How do we backup the database?
 
