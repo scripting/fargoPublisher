@@ -78,6 +78,8 @@ You're going to need to make a few decisions before you deploy.
 
 3. What domain for the user names? You have to own the domain and the DNS should point to the node server so it can redirect to the user's content when subdomains are accessed.
 
+4. What port do you want the server to run on? If you don't specify it, the server will boot on port 80.
+
 For my deployment I went with (Unix shell commands):
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. export fpHostingPath=/beta.fargo.io/users/
@@ -86,7 +88,7 @@ For my deployment I went with (Unix shell commands):
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. export fpDomain=smallpict.com
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. export fpServerPort=1337
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. export fpServerPort=80
 
 
 
@@ -136,13 +138,9 @@ Thanks to Brent Simmons for his Hello World server <a href="http://inessential.c
 
 I had to not use the CNAME in testing yesterday. Verify that it works.
 
-Make the port a configurable option.
-
 Stats!
 
 "This type of response MUST NOT have a body. Ignoring data passed to end()."
-
-Clean up console log. Too noisy.
 
 When you go to dave.smallpict.com, the rendered website is displayed or the OPML. A choice must be made.
 
@@ -152,9 +150,15 @@ How do we backup the database?
 
 Be smarter about file types? -- Should HTML files really be text/plain type? (Are they?) 
 
+Create an OPML file of user information, every so often.
+
 
 
 ### Done
+
+Clean up console log calls. Too noisy.
+
+Make the port a configurable option.
 
 User interface in Fargo.
 

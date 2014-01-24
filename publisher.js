@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 10:59:12 AM Eastern.
+	//Last update: 1/24/2014; 11:54:56 AM Eastern.
 
-var myVersion = "0.56"; 
+var myVersion = "0.58"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -26,7 +26,6 @@ function httpReadUrl (url, callback) {
 			callback (body) 
 			}
 		});
-	
 	}
 function s3SplitPath (path) { //split path like this: /tmp.scripting.com/testing/one.txt -- into bucketname and path.
 	var bucketname = "";
@@ -158,7 +157,6 @@ function parsePackages (name, s) { //name is something like "dave"
 			htmltext = s.substr (0, ix);
 			s = s.substr (ix);
 			}
-		console.log ("\"" + path + "\" == " + htmltext.length + " characters.");
 		
 		if (path.length > 0) {
 			if (path [0] == "/") { //delete leading slash, if present
@@ -174,12 +172,9 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	var name = sections [0];
 	getNameRecord (name, function (jsontext) {
 		var obj = JSON.parse (jsontext);
-		console.log ("handlePackagePing: jsontext == " + jsontext);
 		httpReadUrl (obj.opmlUrl, function (httptext) {
 			var urlpackage = scrapeTagValue (httptext, "linkHosting");
-			console.log ("handlePackagePing: package url == " + urlpackage);
 			httpReadUrl (urlpackage, function (packagetext) {
-				console.log ("package text: " + packagetext.length + " chars.");
 				parsePackages (name, packagetext);
 				});
 			});
@@ -189,9 +184,9 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 console.log ("Fargo Publisher server v" + myVersion);
 
 var server = http.createServer (function (httpRequest, httpResponse) {
-	console.log (httpRequest.url);
-	
 	var parsedUrl = urlpack.parse (httpRequest.url, true);
+	
+	console.log (parsedUrl.pathname);
 	
 	switch (parsedUrl.pathname.toLowerCase ()) {
 		case "/pingpackage":
@@ -246,25 +241,21 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 			
 			if (url == undefined) {
 				var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
-				console.log ("No url parameter.");
 				httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 				}
 			else {
 				isNameDefined (recordkey, function (fldefined) {
 					if (fldefined) {
 						var x = {flError: true, errorString: "Can't assign the name '" + recordkey + "' to the outline because there already is an outline with that name."};
-						console.log ("Name is defined.");
 						httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 						}
 					else {
 						addNameRecord (recordkey, url, function (err, data) {
 							if (err) {
-								console.log ("There was an error: " + JSON.stringify (err));
 								httpResponse.end ("getData (" + JSON.stringify (err) + ")");    
 								}
 							else {
 								var x = {flError: false, name: recordkey + "." + myDomain};
-								console.log ("No error: " + recordkey + "." + myDomain);
 								httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 								}
 							});
