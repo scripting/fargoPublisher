@@ -136,16 +136,6 @@ Thanks to Brent Simmons for his Hello World server <a href="http://inessential.c
 
 ### Todo list
 
-I had to <i>not</i> use the CNAME in testing yesterday. 
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The name is pub.fargo.io -- and when I tested it today it didn't work.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Doing a little <a href="https://www.nodejitsu.com/documentation/features/dns/">research</a> on Nodejitsu, they have a custom field in the package.json file, "domains" -- that apparently is where you can specify alternate names for your "drone."
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Let's see if it works...
-
-
-
 Stats!
 
 "This type of response MUST NOT have a body. Ignoring data passed to end()."
@@ -156,13 +146,29 @@ Related question -- where to point the fpDomain environment variable. Where ever
 
 How do we backup the database?
 
-Be smarter about file types? -- Should HTML files really be text/plain type? (Are they?) 
-
 Create an OPML file of user information, every so often.
+
+I had to <i>not</i> use the CNAME in testing yesterday. 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The name is pub.fargo.io -- and when I tested it today it didn't work.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Doing a little <a href="https://www.nodejitsu.com/documentation/features/dns/">research</a> on Nodejitsu, they have a custom field in the package.json file, "domains" -- that apparently is where you can specify alternate names for your "drone."
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Let's see if it works...
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It doesn't. I tried going to <a href="http://pub.fargo.io/version">http://pub.fargo.io/version</a> -- and get a 404 from Nodejitsu. 
+
+
 
 
 
 ### Done
+
+Be smarter about file types? -- Should HTML files really be text/plain type? (Are they?) 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Amazon code seems to be smart about this, making a file with the extension .html of type text/html.
+
+
 
 Clean up console log calls. Too noisy.
 

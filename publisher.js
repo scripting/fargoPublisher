@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 12:07:31 PM Eastern.
+	//Last update: 1/24/2014; 12:16:06 PM Eastern.
 
-var myVersion = "0.58"; 
+var myVersion = "0.59"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
