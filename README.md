@@ -120,17 +120,17 @@ The app is in package.js. package.json already contains all the info that node n
 
 ### Todo list
 
-User interface in Fargo.
-
 When you go to dave.smallpict.com, the OPML is displayed.
 
 How do we backup the database?
 
-Need to be smarter about file types -- should HTML files really be text/plain type? 
+Be smarter about file types? -- Should HTML files really be text/plain type? (Are they?) 
 
 
 
 ### Done
+
+User interface in Fargo.
 
 Come up with a cname for fargopub1.jit.su. (pub.fargo.io)
 
