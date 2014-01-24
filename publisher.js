@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 12:23:46 PM Eastern.
+	//Last update: 1/24/2014; 12:27:42 PM Eastern.
 
 var myVersion = "0.60"; 
 
@@ -187,7 +187,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 	if (httpRequest.method == "HEAD") {
 		httpRequest.end (null);
 		}
-	else }
+	else {
 		var parsedUrl = urlpack.parse (httpRequest.url, true);
 		
 		console.log (parsedUrl.pathname);

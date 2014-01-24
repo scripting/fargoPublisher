@@ -140,6 +140,12 @@ Stats!
 
 "This type of response MUST NOT have a body. Ignoring data passed to end()."
 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Apparently this comes when you end a HEAD request with a non-empty string.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now we special-case HEAD requests, and return null.
+
+
+
 When you go to dave.smallpict.com, the rendered website is displayed or the OPML. A choice must be made.
 
 Related question -- where to point the fpDomain environment variable. Where ever it points must be ready to redirect, based on the choice we make, above.
