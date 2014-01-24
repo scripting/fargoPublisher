@@ -118,6 +118,18 @@ The app is in package.js. package.json already contains all the info that node n
 
 
 
+### Details
+
+There's a folder of OPML files that contains the outlines that the JS and MD come from.
+
+We use the MIT License. Nothing proprietary about the protocol or the code. You are encouraged to clone, innovate, enjoy.
+
+I love programming in this mode. The tools are great, and node is a wonderful environment, made that way by programmers who share their work so generously. The quality of the work is very impressive. And the committment to no breakage also refreshing in this day and age. 
+
+Thanks to Brent Simmons for his Hello World server <a href="http://inessential.com/2013/12/09/getting_started_with_node_js_for_cocoa_">example</a>. They helped this node newbie get started. He says his example is for Cocoa developers, but that's not true. I understood it, and I've never written a line of Cocoa in my life, and think it's a silly name for a programming environment. ;-)
+
+
+
 ### Todo list
 
 When you go to dave.smallpict.com, the OPML is displayed.
