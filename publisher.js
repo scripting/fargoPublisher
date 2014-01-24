@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 12:16:06 PM Eastern.
+	//Last update: 1/24/2014; 12:23:46 PM Eastern.
 
-var myVersion = "0.59"; 
+var myVersion = "0.60"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -184,108 +184,113 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 console.log ("Fargo Publisher server v" + myVersion);
 
 var server = http.createServer (function (httpRequest, httpResponse) {
-	var parsedUrl = urlpack.parse (httpRequest.url, true);
-	
-	console.log (parsedUrl.pathname);
-	
-	switch (parsedUrl.pathname.toLowerCase ()) {
-		case "/pingpackage":
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			
-			handlePackagePing (parsedUrl.query.link);
-			
-			var x = {"url": parsedUrl.query.link};
-			var s = "getData (" + JSON.stringify (x) + ")";
-			httpResponse.end (s);    
-			
-			break;
-		case "/isnameavailable":
-			function sendStringBack (s) {
-				var x = {"message": s};
-				httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-				}
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			
-			var name = cleanName (parsedUrl.query.name);
-			
-			if (name.length == 0) {
-				sendStringBack ("");    
-				}
-			else {
-				if (name.length < 4) {
-					sendStringBack ("Name must be 4 or more characters.");
+	if (httpRequest.method == "HEAD") {
+		httpRequest.end (null);
+		}
+	else }
+		var parsedUrl = urlpack.parse (httpRequest.url, true);
+		
+		console.log (parsedUrl.pathname);
+		
+		switch (parsedUrl.pathname.toLowerCase ()) {
+			case "/pingpackage":
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				
+				handlePackagePing (parsedUrl.query.link);
+				
+				var x = {"url": parsedUrl.query.link};
+				var s = "getData (" + JSON.stringify (x) + ")";
+				httpResponse.end (s);    
+				
+				break;
+			case "/isnameavailable":
+				function sendStringBack (s) {
+					var x = {"message": s};
+					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+					}
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				
+				var name = cleanName (parsedUrl.query.name);
+				
+				if (name.length == 0) {
+					sendStringBack ("");    
 					}
 				else {
-					isNameDefined (name, function (fldefined) {
-						var color, answer;
+					if (name.length < 4) {
+						sendStringBack ("Name must be 4 or more characters.");
+						}
+					else {
+						isNameDefined (name, function (fldefined) {
+							var color, answer;
+							if (fldefined) {
+								color = "red";
+								answer = "is not";
+								}
+							else {
+								color = "green";
+								answer = "is";
+								}
+							sendStringBack ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
+							});
+						}
+					}
+				
+				break;
+			case "/newoutlinename":
+				var recordkey = cleanName (parsedUrl.query.name), url = parsedUrl.query.url;
+				
+				console.log ("Create new outline name: " + recordkey + ", url=" + url);
+				
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				
+				if (url == undefined) {
+					var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
+					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+					}
+				else {
+					isNameDefined (recordkey, function (fldefined) {
 						if (fldefined) {
-							color = "red";
-							answer = "is not";
+							var x = {flError: true, errorString: "Can't assign the name '" + recordkey + "' to the outline because there already is an outline with that name."};
+							httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 							}
 						else {
-							color = "green";
-							answer = "is";
+							addNameRecord (recordkey, url, function (err, data) {
+								if (err) {
+									httpResponse.end ("getData (" + JSON.stringify (err) + ")");    
+									}
+								else {
+									var x = {flError: false, name: recordkey + "." + myDomain};
+									httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+									}
+								});
 							}
-						sendStringBack ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
 						});
 					}
-				}
-			
-			break;
-		case "/newoutlinename":
-			var recordkey = cleanName (parsedUrl.query.name), url = parsedUrl.query.url;
-			
-			console.log ("Create new outline name: " + recordkey + ", url=" + url);
-			
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			
-			if (url == undefined) {
-				var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
-				httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-				}
-			else {
-				isNameDefined (recordkey, function (fldefined) {
-					if (fldefined) {
-						var x = {flError: true, errorString: "Can't assign the name '" + recordkey + "' to the outline because there already is an outline with that name."};
+				break;
+			case "/geturlfromname":
+				var name = cleanName (parsedUrl.query.name);
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				getNameRecord (name, function (jsontext) {
+					if (jsontext == null) {
+						var x = {flError: true, errorString: "Can't open the outline named '" + name + "' because there is no outline with that name."};
 						httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 						}
 					else {
-						addNameRecord (recordkey, url, function (err, data) {
-							if (err) {
-								httpResponse.end ("getData (" + JSON.stringify (err) + ")");    
-								}
-							else {
-								var x = {flError: false, name: recordkey + "." + myDomain};
-								httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-								}
-							});
+						var obj = JSON.parse (jsontext);
+						var x = {flError: false, url: obj.opmlUrl};
+						httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 						}
 					});
-				}
-			break;
-		case "/geturlfromname":
-			var name = cleanName (parsedUrl.query.name);
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			getNameRecord (name, function (jsontext) {
-				if (jsontext == null) {
-					var x = {flError: true, errorString: "Can't open the outline named '" + name + "' because there is no outline with that name."};
-					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-					}
-				else {
-					var obj = JSON.parse (jsontext);
-					var x = {flError: false, url: obj.opmlUrl};
-					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-					}
-				});
-			break;
-		case "/version":
-			httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
-			httpResponse.end (myVersion);    
-			break;
-		default:
-			httpResponse.writeHead (404, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
-			httpResponse.end ("404 Not Found");
-			break;
+				break;
+			case "/version":
+				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
+				httpResponse.end (myVersion);    
+				break;
+			default:
+				httpResponse.writeHead (404, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
+				httpResponse.end ("404 Not Found");
+				break;
+			}
 		}
 	});
 
