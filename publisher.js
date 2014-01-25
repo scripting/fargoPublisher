@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 5:46:46 PM Eastern.
+	//Last update: 1/24/2014; 7:32:49 PM Eastern.
 
-var myVersion = "0.62"; 
+var myVersion = "0.63"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -175,7 +175,6 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	var sections = parsedUrl.host.split (".");
 	var name = sections [0];
 	
-	console.log ("handlePackagePing: " + name);
 	
 	getNameRecord (name, function (jsontext) {
 		var obj = JSON.parse (jsontext);

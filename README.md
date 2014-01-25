@@ -138,14 +138,6 @@ Thanks to Brent Simmons for his Hello World server <a href="http://inessential.c
 
 Stats!
 
-"This type of response MUST NOT have a body. Ignoring data passed to end()."
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Apparently this comes when you end a HEAD request with a non-empty string.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now we special-case HEAD requests, and return null.
-
-
-
 When you go to dave.smallpict.com, the rendered website is displayed or the OPML. A choice must be made.
 
 Related question -- where to point the fpDomain environment variable. Where ever it points must be ready to redirect, based on the choice we make, above.
@@ -164,11 +156,21 @@ I had to <i>not</i> use the CNAME in testing yesterday.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It doesn't. I tried going to <a href="http://pub.fargo.io/version">http://pub.fargo.io/version</a> -- and get a 404 from Nodejitsu. 
 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;So I hacked it for now, with a special case in the Fargo CMS code for pub.fargo.io.
+
 
 
 
 
 ### Done
+
+"This type of response MUST NOT have a body. Ignoring data passed to end()."
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Apparently this comes when you end a HEAD request with a non-empty string.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now we special-case HEAD requests, and return null.
+
+
 
 Be smarter about file types? -- Should HTML files really be text/plain type? (Are they?) 
 
