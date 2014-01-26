@@ -8,7 +8,7 @@
      "start": "node publisher.js"
      },
   "domains": [
-     "*.smallpict.com"
+     "smallpict.com"
      ],
   "repository": {
     "type": "git",
