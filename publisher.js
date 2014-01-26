@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/24/2014; 7:32:49 PM Eastern.
+	//Last update: 1/26/2014; 11:03:34 AM Eastern.
 
-var myVersion = "0.63"; 
+var myVersion = "0.64"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -200,7 +200,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 	else {
 		var parsedUrl = urlpack.parse (httpRequest.url, true);
 		
-		console.log (parsedUrl.pathname);
+		console.log (parsedUrl.hostname + "/" + parsedUrl.pathname);
 		
 		switch (parsedUrl.pathname.toLowerCase ()) {
 			case "/pingpackage":
