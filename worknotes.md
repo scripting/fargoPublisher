@@ -1,3 +1,15 @@
+### 1/27/14 by DW
+
+Spent the day getting node.js set up on a Linux instance on Amazon. Lots of learning. Many thanks for Dan MacTough for guiding me through it! :-)
+
+Along the way I found out why my instance stopped loading on Nodejitsu (I think, we'll find out soon enough). I changed the app from running on port 1337 to port 80. There's a Unix rule that only root can run on ports less than 1024. So I went back to 1337. 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;His message: "That is a permission error caused by a non privileged user trying to listen on a privileged port. Only root can listen on ports <= 1024. For now, just prefix your command with sudo. That isn't safe for production, but one step at a time. Next step will be either to listen on a nonprivileged port and use a proxy, or find a safe way to listen on port 80."
+
+
+
+
+
 ### 1/26/14 by DW
 
 Mapped *.smallpict.com to my Nodejitsu server

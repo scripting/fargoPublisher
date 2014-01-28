@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/26/2014; 9:12:03 PM Eastern.
+	//Last update: 1/27/2014; 8:01:53 PM Eastern.
 
-var myVersion = "0.63"; 
+var myVersion = "0.65"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -191,8 +191,6 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 		});
 	}
 
-console.log ("Fargo Publisher server v" + myVersion);
-
 var server = http.createServer (function (httpRequest, httpResponse) {
 	if (httpRequest.method == "HEAD") {
 		httpRequest.end (null);
@@ -307,4 +305,16 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 if (myPort == undefined) {
 	myPort = 80;
 	}
+
 server.listen (myPort);
+
+console.log ("");
+console.log ("");
+console.log ("Fargo Publisher server v" + myVersion + ".");
+console.log ("");
+console.log ("S3 data path == " + s3DataPath + ".");
+console.log ("S3 names path == " + s3NamesPath + ".");
+console.log ("S3 stats path == " + s3StatsPath + ".");
+console.log ("Domain == " + myDomain + ".");
+console.log ("Port == " + myPort + ".");
+console.log ("");
