@@ -1,3 +1,23 @@
+### 1/28/14 by DW
+
+Got boston.scripting.com:5337 up, running the latest publisher.js.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hooked it up to Fargo -- it works.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Got redirects to work, with a module on Buffalo server. 
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Because Boston is running on port 5337 and not 80, I had to have this running in Frontier for now.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Going to let this config settle in for a bit, and get everyone ready for a public beta of Fargo2.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nodejitsu didn't work out for deploying fargoPublisher. I wrote it up on the Fargo2 list.
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now we don't really have a cloning strategy for poets to run the server. 
+
+
+
+
+
 ### 1/27/14 by DW
 
 Spent the day getting node.js set up on a Linux instance on Amazon. Lots of learning. Many thanks for Dan MacTough for guiding me through it! :-)

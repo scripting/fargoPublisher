@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/27/2014; 8:14:58 PM Eastern.
+	//Last update: 1/28/2014; 9:43:57 PM Eastern.
 
-var myVersion = "0.65"; 
+var myVersion = "0.69"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -20,6 +20,9 @@ var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 
+function consoleLog (s) {
+	console.log (new Date ().toLocaleTimeString () + " -- " + s);
+	}
 function httpReadUrl (url, callback) {
 	request (url, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
@@ -55,7 +58,6 @@ function s3NewObject (path, data, type, acl, callback) {
 		Key: splitpath.Key
 		};
 	s3.putObject (params, function (err, data) { 
-		console.log ("s3NewObject: http://" + splitpath.Bucket + "/" + splitpath.Key);
 		if (callback != undefined) {
 			callback (err, data);
 			}
@@ -143,7 +145,7 @@ function scrapeTagValue (sourcestring, tagname) {
 	return ("");
 	}
 function parsePackages (name, s) { //name is something like "dave"
-	var magicpattern = "<[{~#--- ", ix, path, htmltext;
+	var magicpattern = "<[{~#--- ", ix, path, htmltext, ctfiles = 0, ctchars = 0;
 	while (s.length > 0) {
 		ix = s.indexOf (magicpattern);
 		if (ix < 0) {
@@ -167,8 +169,11 @@ function parsePackages (name, s) { //name is something like "dave"
 				path = path.substr (1);
 				}
 			s3NewObject (s3HostingPath + name + "/" + path, htmltext, "text/html");
+			ctfiles++;
+			ctchars += htmltext.length;
 			}
 		}
+	consoleLog (ctfiles + " files written, " + ctchars + " chars.");
 	}
 function handlePackagePing (subdomain) { //something like http://dave.smallpict.com/
 	var parsedUrl = urlpack.parse (subdomain, true);
@@ -177,17 +182,22 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	
 	
 	getNameRecord (name, function (jsontext) {
-		var obj = JSON.parse (jsontext);
-		httpReadUrl (obj.opmlUrl, function (httptext) {
-			var urlpackage = scrapeTagValue (httptext, "linkHosting");
-			httpReadUrl (urlpackage, function (packagetext) {
-				parsePackages (name, packagetext);
-				
-				obj.whenLastUpdate = new Date ().toString ();
-				obj.urlRedirect = "http:/" + s3HostingPath + name + "/"; 
-				updateNameRecord (name, obj);
+		if (jsontext == null) {
+			consoleLog ("Can't handle the package ping for the outline named \"" + name + "\" because there is no outline with that name.");
+			}
+		else {
+			var obj = JSON.parse (jsontext);
+			httpReadUrl (obj.opmlUrl, function (httptext) {
+				var urlpackage = scrapeTagValue (httptext, "linkHosting");
+				httpReadUrl (urlpackage, function (packagetext) {
+					parsePackages (name, packagetext);
+					
+					obj.whenLastUpdate = new Date ().toString ();
+					obj.urlRedirect = "http:/" + s3HostingPath + name + "/"; 
+					updateNameRecord (name, obj);
+					});
 				});
-			});
+			}
 		});
 	}
 
@@ -198,11 +208,12 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 	else {
 		var parsedUrl = urlpack.parse (httpRequest.url, true);
 		
-		console.log (parsedUrl.pathname);
 		
 		switch (parsedUrl.pathname.toLowerCase ()) {
 			case "/pingpackage":
 				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				
+				consoleLog ("Ping package: outline == " + parsedUrl.query.link);
 				
 				handlePackagePing (parsedUrl.query.link);
 				
@@ -219,6 +230,8 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
 				
 				var name = cleanName (parsedUrl.query.name);
+				
+				consoleLog ("Is name available? name == " + name);
 				
 				if (name.length == 0) {
 					sendStringBack ("");    
@@ -247,7 +260,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 			case "/newoutlinename":
 				var recordkey = cleanName (parsedUrl.query.name), url = parsedUrl.query.url;
 				
-				console.log ("Create new outline name: " + recordkey + ", url=" + url);
+				consoleLog ("Create new outline name: " + recordkey + ", url=" + url);
 				
 				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
 				
@@ -292,6 +305,7 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 				break;
 			case "/version":
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
+				consoleLog ("Version: " + myVersion);
 				httpResponse.end (myVersion);    
 				break;
 			default:
