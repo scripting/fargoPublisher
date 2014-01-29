@@ -1,3 +1,13 @@
+### 1/29/14 by DW
+
+The first stats file is being maintained, <a href="http://beta.fargo.io/data/stats/changes.json">changes.json</a>.
+
+It's a reverse-chronologic list of updated outlines. 
+
+Patterned after changes.xml which we used to bootstrap weblogs.com, in 2000.
+
+
+
 ### 1/28/14 by DW
 
 Got boston.scripting.com:5337 up, running the latest publisher.js.
