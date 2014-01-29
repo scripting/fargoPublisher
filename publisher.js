@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/28/2014; 9:57:50 PM Eastern.
+	//Last update: 1/29/2014; 5:49:25 PM Eastern.
 
-var myVersion = "0.69"; 
+var myVersion = "0.70"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -14,6 +14,9 @@ var s3StatsPath = s3DataPath + "stats";
 var myDomain = process.env.fpDomain; //something like smallpict.com
 var myPort = process.env.fpServerPort; //what port should the server run on?
 
+var maxChanges = 100;
+var nameChangesFile = "changes.json";
+
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -22,6 +25,43 @@ var s3 = new AWS.S3 ();
 
 function consoleLog (s) {
 	console.log (new Date ().toLocaleTimeString () + " -- " + s);
+	}
+function padWithZeros (num, ctplaces) {
+	var s = num.toString ();
+	while (s.length < ctplaces) {
+		s = "0" + s;
+		}
+	return (s);
+	}
+function isAlpha (ch) {
+	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
+	}
+function isNumeric (ch) {
+	return ((ch >= '0') && (ch <= '9'));
+	}
+function cleanName (name) {
+	var s = "";
+	for (var i = 0; i < name.length; i++) {
+		var ch = name [i];
+		if (isAlpha (ch) || isNumeric (ch)) {
+			s += ch;
+			}
+		}
+	return (s.toLowerCase (s));
+	}
+function scrapeTagValue (sourcestring, tagname) {
+	var s = sourcestring; //work with a copy
+	var opentag = "<" + tagname + ">", closetag = "</" + tagname + ">";
+	var ix = s.indexOf (opentag);
+	if (ix >= 0) {
+		s = s.substr (ix + opentag.length);
+		ix = s.indexOf (closetag);
+		if (ix >= 0) {
+			s = s.substr (0, ix);
+			return (s);
+			}
+		}
+	return ("");
 	}
 function httpReadUrl (url, callback) {
 	request (url, function (error, response, body) {
@@ -107,43 +147,36 @@ function getNameRecord (name, callback) {
 		});
 	}
 
-function padWithZeros (num, ctplaces) {
-	var s = num.toString ();
-	while (s.length < ctplaces) {
-		s = "0" + s;
-		}
-	return (s);
-	}
-function isAlpha (ch) {
-	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
-	}
-function isNumeric (ch) {
-	return ((ch >= '0') && (ch <= '9'));
-	}
-function cleanName (name) {
-	var s = "";
-	for (var i = 0; i < name.length; i++) {
-		var ch = name [i];
-		if (isAlpha (ch) || isNumeric (ch)) {
-			s += ch;
+function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by DW
+	var path = s3StatsPath + "/" + nameChangesFile;
+	s3GetObject (path, function (data) {
+		var changes, obj = new Object ();
+		
+		if (data == null) {
+			changes = new Array ();
 			}
-		}
-	return (s.toLowerCase (s));
-	}
-function scrapeTagValue (sourcestring, tagname) {
-	var s = sourcestring; //work with a copy
-	var opentag = "<" + tagname + ">", closetag = "</" + tagname + ">";
-	var ix = s.indexOf (opentag);
-	if (ix >= 0) {
-		s = s.substr (ix + opentag.length);
-		ix = s.indexOf (closetag);
-		if (ix >= 0) {
-			s = s.substr (0, ix);
-			return (s);
+		else {
+			changes = JSON.parse (data.Body);
 			}
-		}
-	return ("");
+		
+		for (var i = changes.length - 1; i >= 0; i--) { //delete all other instances of the url in the array
+			if (changes [i].url == url) {
+				changes.splice (i, 1);
+				}
+			}
+		
+		obj.url = url;  //add at beginning of array
+		obj.when = new Date ().toString ();
+		changes.unshift (obj);
+		
+		while (changes.length > maxChanges) { //keep array within max size
+			changes.pop ();
+			}
+		
+		s3NewObject (path, JSON.stringify (changes, undefined, 3));
+		});
 	}
+
 function parsePackages (name, s) { //name is something like "dave"
 	var magicpattern = "<[{~#--- ", ix, path, htmltext, ctfiles = 0, ctchars = 0;
 	while (s.length > 0) {
@@ -195,6 +228,7 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 					obj.whenLastUpdate = new Date ().toString ();
 					obj.urlRedirect = "http:/" + s3HostingPath + name + "/"; 
 					updateNameRecord (name, obj);
+					statsAddToChanges (subdomain); //add it to changes.json -- 1/29/14 by DW
 					});
 				});
 			}
