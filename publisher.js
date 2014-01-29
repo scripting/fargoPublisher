@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/28/2014; 9:43:57 PM Eastern.
+	//Last update: 1/28/2014; 9:57:50 PM Eastern.
 
 var myVersion = "0.69"; 
 
@@ -305,7 +305,6 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 				break;
 			case "/version":
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
-				consoleLog ("Version: " + myVersion);
 				httpResponse.end (myVersion);    
 				break;
 			default:
