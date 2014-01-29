@@ -4,7 +4,7 @@ The first stats file is being maintained, <a href="http://beta.fargo.io/data/sta
 
 It's a reverse-chronologic list of updated outlines. 
 
-Patterned after changes.xml which we used to bootstrap weblogs.com, in 2000.
+Patterned after <a href="http://www.weblogs.com/api.html#10">changes.xml</a> which we used to bootstrap weblogs.com, in 2000.
 
 
 
