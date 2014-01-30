@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/29/2014; 9:48:59 PM Eastern.
+	//Last update: 1/30/2014; 11:37:54 AM Eastern.
 
-var myVersion = "0.71"; 
+var myVersion = "0.72"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -177,7 +177,7 @@ function getNameRecord (name, callback) {
 function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by DW
 	var path = s3StatsPath + "/" + nameChangesFile;
 	s3GetObject (path, function (data) {
-		var changes, obj = new Object ();
+		var changes, obj = new Object (), ctupdates = 0;
 		
 		if (data == null) {
 			changes = new Array ();
@@ -188,12 +188,17 @@ function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by D
 		
 		for (var i = changes.length - 1; i >= 0; i--) { //delete all other instances of the url in the array
 			if (changes [i].url == url) {
+				if (changes [i].ct != undefined) {
+					ctupdates = changes [i].ct;
+					}
 				changes.splice (i, 1);
 				}
 			}
 		
 		obj.url = url;  //add at beginning of array
 		obj.when = new Date ().toString ();
+		obj.ct = ++ctupdates;
+		
 		changes.unshift (obj);
 		
 		while (changes.length > maxChanges) { //keep array within max size

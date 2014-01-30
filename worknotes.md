@@ -1,3 +1,9 @@
+### 1/30/14 by DW
+
+There's now a "ct" in each element in changes.json, which counts the number of times the site has been updated.
+
+
+
 ### 1/29/14 by DW
 
 The first stats file is being maintained, <a href="http://beta.fargo.io/data/stats/changes.json">changes.json</a>.
