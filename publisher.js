@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/29/2014; 5:54:23 PM Eastern.
+	//Last update: 1/29/2014; 9:48:59 PM Eastern.
 
-var myVersion = "0.70"; 
+var myVersion = "0.71"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -25,6 +25,33 @@ var s3 = new AWS.S3 ();
 
 function consoleLog (s) {
 	console.log (new Date ().toLocaleTimeString () + " -- " + s);
+	}
+function stringLower (s) {
+	return (s.toLowerCase ());
+	}
+function endsWith (s, possibleEnding, flUnicase) {
+	if (s.length == 0) { 
+		return (false);
+		}
+	var ixstring = s.length - 1;
+	if (flUnicase == undefined) {
+		flUnicase = true;
+		}
+	if (flUnicase) {
+		for (var i = possibleEnding.length - 1; i >= 0; i--) {
+			if (stringLower (s [ixstring--]) != stringLower (possibleEnding [i])) {
+				return (false);
+				}
+			}
+		}
+	else {
+		for (var i = possibleEnding.length - 1; i >= 0; i--) {
+			if (s [ixstring--] != possibleEnding [i]) {
+				return (false);
+				}
+			}
+		}
+	return (true);
 	}
 function padWithZeros (num, ctplaces) {
 	var s = num.toString ();
@@ -210,9 +237,16 @@ function parsePackages (name, s) { //name is something like "dave"
 	}
 function handlePackagePing (subdomain) { //something like http://dave.smallpict.com/
 	var parsedUrl = urlpack.parse (subdomain, true);
-	var sections = parsedUrl.host.split (".");
+	var host = parsedUrl.host;
+	
+	if (!endsWith (host, myDomain)) { //1/29/14 by DW -- not one of our domains
+		return;
+		}
+	
+	var sections = host.split (".");
 	var name = sections [0];
 	
+	consoleLog ("Ping received: " + host);
 	
 	getNameRecord (name, function (jsontext) {
 		if (jsontext == null) {
@@ -246,8 +280,6 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 		switch (parsedUrl.pathname.toLowerCase ()) {
 			case "/pingpackage":
 				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-				
-				consoleLog ("Ping package: outline == " + parsedUrl.query.link);
 				
 				handlePackagePing (parsedUrl.query.link);
 				
