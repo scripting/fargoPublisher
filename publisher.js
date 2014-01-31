@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/30/2014; 11:37:54 AM Eastern.
+	//Last update: 1/31/2014; 9:29:39 AM Eastern.
 
-var myVersion = "0.72"; 
+var myVersion = "0.73"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -128,6 +128,18 @@ function s3NewObject (path, data, type, acl, callback) {
 		if (callback != undefined) {
 			callback (err, data);
 			}
+		});
+	}
+function s3Redirect (path, url) { //1/30/14 by DW -- doesn't appear to work -- don't know why
+	var splitpath = s3SplitPath (path);
+	var params = {
+		WebsiteRedirectLocation: url,
+		Bucket: splitpath.Bucket,
+		Key: splitpath.Key,
+		Body: " "
+		};
+	s3.putObject (params, function (err, data) { 
+		consoleLog ("s3Redirect: path = " + path + ", url = " + url + ", data = ", JSON.stringify (data));
 		});
 	}
 function s3GetObjectMetadata (path, callback) {
@@ -266,7 +278,14 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 					
 					obj.whenLastUpdate = new Date ().toString ();
 					obj.urlRedirect = "http:/" + s3HostingPath + name + "/"; 
+					
+					if (obj.ctUpdates == undefined) { //1/31/14 by DW
+						obj.ctUpdates = 0;
+						}
+					obj.ctUpdates++;
+					
 					updateNameRecord (name, obj);
+					
 					statsAddToChanges (subdomain); //add it to changes.json -- 1/29/14 by DW
 					});
 				});
