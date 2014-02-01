@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/31/2014; 9:29:39 AM Eastern.
+	//Last update: 1/31/2014; 8:45:23 PM Eastern.
 
-var myVersion = "0.73"; 
+var myVersion = "0.74"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -30,7 +30,7 @@ function stringLower (s) {
 	return (s.toLowerCase ());
 	}
 function endsWith (s, possibleEnding, flUnicase) {
-	if (s.length == 0) { 
+	if ((s == undefined) || (s.length == 0)) { 
 		return (false);
 		}
 	var ixstring = s.length - 1;
@@ -139,6 +139,9 @@ function s3Redirect (path, url) { //1/30/14 by DW -- doesn't appear to work -- d
 		Body: " "
 		};
 	s3.putObject (params, function (err, data) { 
+		if (err != null) {
+			consoleLog ("s3Redirect: err.message = " + err.message + ".");
+			}
 		consoleLog ("s3Redirect: path = " + path + ", url = " + url + ", data = ", JSON.stringify (data));
 		});
 	}
@@ -256,6 +259,9 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	var parsedUrl = urlpack.parse (subdomain, true);
 	var host = parsedUrl.host;
 	
+	if (host == undefined) { //1/31/14 by DW
+		return;
+		}
 	if (!endsWith (host, myDomain)) { //1/29/14 by DW -- not one of our domains
 		return;
 		}
@@ -411,6 +417,9 @@ if (myPort == undefined) {
 
 server.listen (myPort);
 
+//random test code
+	s3Redirect ("/beta.fargo.io/tmp.html", "http://scripting.com/2014/01/30/theBrowserAndSpacesAfterPeriods.html");
+	
 console.log ("");
 console.log ("");
 console.log ("Fargo Publisher server v" + myVersion + ".");
