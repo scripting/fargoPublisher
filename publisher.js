@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/31/2014; 8:58:51 PM Eastern.
+	//Last update: 2/1/2014; 1:44:43 PM Eastern.
 
 var myVersion = "0.74"; 
 
@@ -12,7 +12,15 @@ var s3NamesPath = s3DataPath + "names";
 var s3StatsPath = s3DataPath + "stats"; 
 
 var myDomain = process.env.fpDomain; //something like smallpict.com
-var myPort = process.env.fpServerPort; //what port should the server run on?
+
+var myPort;
+if (process.env.PORT == undefined) { //it's not Heroku -- 2/1/14 by DW
+	myPort = process.env.fpServerPort;
+	}
+else {
+	myPort = process.env.PORT;
+	}
+
 
 var maxChanges = 100;
 var nameChangesFile = "changes.json";
