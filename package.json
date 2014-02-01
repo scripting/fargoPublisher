@@ -3,7 +3,7 @@
   "subdomain": "fargoPub1",
   "description": "A JavaScript project to connect to Fargo to publish a folder in Dropbox.",
   "author": "Dave Winer <dave@smallpicture.com>",
-  "version": "0.64",
+  "version": "0.7.4",
   "scripts": {
      "start": "node publisher.js"
      },

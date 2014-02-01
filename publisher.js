@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 1/31/2014; 8:45:23 PM Eastern.
+	//Last update: 1/31/2014; 8:58:51 PM Eastern.
 
 var myVersion = "0.74"; 
 
@@ -418,7 +418,7 @@ if (myPort == undefined) {
 server.listen (myPort);
 
 //random test code
-	s3Redirect ("/beta.fargo.io/tmp.html", "http://scripting.com/2014/01/30/theBrowserAndSpacesAfterPeriods.html");
+	s3Redirect ("/beta.fargo.io/tmp.html", "http://davewiner.com/");
 	
 console.log ("");
 console.log ("");
