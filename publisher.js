@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/1/2014; 1:44:43 PM Eastern.
+	//Last update: 2/1/2014; 9:51:47 PM Eastern.
 
-var myVersion = "0.74"; 
+var myVersion = "0.75"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -150,7 +150,9 @@ function s3Redirect (path, url) { //1/30/14 by DW -- doesn't appear to work -- d
 		if (err != null) {
 			consoleLog ("s3Redirect: err.message = " + err.message + ".");
 			}
-		consoleLog ("s3Redirect: path = " + path + ", url = " + url + ", data = ", JSON.stringify (data));
+		else {
+			consoleLog ("s3Redirect: path = " + path + ", url = " + url + ", data = ", JSON.stringify (data));
+			}
 		});
 	}
 function s3GetObjectMetadata (path, callback) {
