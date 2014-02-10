@@ -1,3 +1,11 @@
+### 2/9/14 by DW
+
+<a href="http://scripting.com/2014/02/06/herokuForPoetsBeta.html">Heroku How To</a>: Get your own Fargo Publisher server running on Heroku. 
+
+<a href="http://scripting.com/2014/02/09/whyFargo2TechnologyIsInteresting.html">Why Fargo 2 technology is exciting</a>. How the new CMS hooks into Fargo Publisher. 
+
+
+
 ### 1/30/14 by DW
 
 There's now a "ct" in each element in changes.json, which counts the number of times the site has been updated.
