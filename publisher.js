@@ -1,7 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/1/2014; 9:51:47 PM Eastern.
+	//Last update: 2/9/2014; 10:21:34 PM Eastern.
 
-var myVersion = "0.75"; 
+var myVersion = "0.77"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -83,6 +83,18 @@ function cleanName (name) {
 			}
 		}
 	return (s.toLowerCase (s));
+	}
+function tcpGetMyIpAddress () {
+	var interfaces = require ("os").networkInterfaces ();
+	for (var devName in interfaces) {
+		var iface = interfaces [devName];
+		for (var i = 0; i < iface.length; i++) {
+			var alias = iface [i];
+			if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal)
+				return (alias.address);
+				}
+		}
+	return ("0.0.0.0");
 	}
 function scrapeTagValue (sourcestring, tagname) {
 	var s = sourcestring; //work with a copy
