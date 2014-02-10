@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/9/2014; 10:26:28 PM Eastern.
+	//Last update: 2/9/2014; 10:41:57 PM Eastern.
 
 var myVersion = "0.77"; 
 
@@ -422,12 +422,16 @@ var server = http.createServer (function (httpRequest, httpResponse) {
 					});
 				break;
 			case "/version":
-				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
+				httpResponse.writeHead (200, {"Content-Type": "text/plain"});
 				httpResponse.end (myVersion);    
 				break;
+			case "/now": //2/9/14 by DW
+				httpResponse.writeHead (200, {"Content-Type": "text/plain"});
+				httpResponse.end (new Date ().toString ());    
+				break;
 			default:
-				httpResponse.writeHead (404, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "fargo.io"});
-				httpResponse.end ("404 Not Found");
+				httpResponse.writeHead (404, {"Content-Type": "text/plain"});
+				httpResponse.end ("404 Not Found. This is not one of the endpoints defined by the Fargo Publsiher API.");
 				break;
 			}
 		}
@@ -439,9 +443,6 @@ if (myPort == undefined) {
 
 server.listen (myPort);
 
-//random test code
-	s3Redirect ("/beta.fargo.io/tmp.html", "http://davewiner.com/");
-	
 console.log ("");
 console.log ("");
 console.log ("Fargo Publisher server v" + myVersion + ".");
