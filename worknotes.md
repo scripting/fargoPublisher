@@ -1,3 +1,9 @@
+### 2/10/14 by DW
+
+<a href="http://fargo.io/blog/2014/02/10/newReleaseOfFargoPublisher.html">Updated publisher</a> to version 0.79. Now it redirects to user sites if you point the domain at the server.
+
+
+
 ### 2/9/14 by DW
 
 <a href="http://scripting.com/2014/02/06/herokuForPoetsBeta.html">Heroku How To</a>: Get your own Fargo Publisher server running on Heroku. 
