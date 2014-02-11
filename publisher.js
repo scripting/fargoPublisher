@@ -1,12 +1,12 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/11/2014; 12:46:09 PM Eastern.
+	//Last update: 2/11/2014; 1:55:49 PM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 
-var myVersion = "0.80"; 
+var myVersion = "0.81"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -29,10 +29,10 @@ if (myPort == undefined) {
 	myPort = 80;
 	}
 
-var maxChanges = 100;
-var nameChangesFile = "changes.json";
+var maxChanges = 100, nameChangesFile = "changes.json";
 
-var ctHits = 0, whenServerStart = new Date ();
+var ctHits = 0, whenServerStart = new Date (), httpLog = new Array (), maxHttpLog = 250, nameHttpLogFile = "httpLog.json";
+
 
 function consoleLog (s) {
 	console.log (new Date ().toLocaleTimeString () + " -- " + s);
@@ -250,6 +250,19 @@ function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by D
 		s3NewObject (path, JSON.stringify (changes, undefined, 3));
 		});
 	}
+function statsAddToHttpLog (host, url, urlRedirect) { //2/11/14 by DW
+	var obj = new Object ();
+	obj.when = new Date ().toUTCString ();
+	obj.url = "http://" + host + url;
+	if (urlRedirect != undefined) {
+		obj.urlRedirect = urlRedirect;
+		}
+	httpLog.unshift (obj);  //add at beginning of array
+	while (httpLog.length > maxHttpLog) { //keep array within max size
+		httpLog.pop ();
+		}
+	s3NewObject (s3StatsPath + nameHttpLogFile, JSON.stringify (httpLog, undefined, 3));
+	}
 function parsePackages (name, s) { //name is something like "dave"
 	var magicpattern = "<[{~#--- ", ix, path, htmltext, ctfiles = 0, ctchars = 0;
 	while (s.length > 0) {
@@ -325,24 +338,22 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 		});
 	}
 
-
-console.log ("");
-console.log ("");
-console.log ("Fargo Publisher server v" + myVersion + ".");
-console.log ("");
-console.log ("S3 data path == " + s3DataPath + ".");
-console.log ("S3 names path == " + s3NamesPath + ".");
-console.log ("S3 stats path == " + s3StatsPath + ".");
-console.log ("Domain == " + myDomain + ".");
-console.log ("Port == " + myPort + ".");
-console.log ("");
+//initial console messages
+	console.log ("");
+	console.log ("");
+	console.log ("Fargo Publisher server v" + myVersion + ".");
+	console.log ("");
+	console.log ("S3 data path == " + s3DataPath + ".");
+	console.log ("S3 names path == " + s3NamesPath + ".");
+	console.log ("S3 stats path == " + s3StatsPath + ".");
+	console.log ("Domain == " + myDomain + ".");
+	console.log ("Port == " + myPort + ".");
+	console.log ("");
 
 http.createServer (function (httpRequest, httpResponse) {
 	var parsedUrl = urlpack.parse (httpRequest.url, true);
 	var lowercasepath = parsedUrl.pathname.toLowerCase ();
 	var now = new Date (), nowstring = now.toString ();
-	
-	ctHits++;
 	
 	//handle HEAD request
 		if (httpRequest.method == "HEAD") {
@@ -354,9 +365,10 @@ http.createServer (function (httpRequest, httpResponse) {
 		var lowerhost = host.toLowerCase ();
 		var lowerdomain = myDomain.toLowerCase ();
 		if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com
-			var newurl = "http://" + s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
+			var newurl = "http:/" + s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
 			httpResponse.writeHead (302, {"location": newurl});
 			httpResponse.end ("302 REDIRECT");    
+			statsAddToHttpLog (httpRequest.headers.host, httpRequest.url, newurl); 
 			return;
 			}
 	
@@ -479,4 +491,7 @@ http.createServer (function (httpRequest, httpResponse) {
 			httpResponse.end ("\"" + parsedUrl.pathname + "\" is not one of the endpoints defined by the Fargo Publsiher API.");
 			break;
 		}
+	
+	statsAddToHttpLog (httpRequest.headers.host, httpRequest.url); 
+	ctHits++;
 	}).listen (myPort);
