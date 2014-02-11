@@ -1,7 +1,12 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/10/2014; 1:07:43 PM Eastern.
+	//Last update: 2/11/2014; 12:46:09 PM Eastern.
+var http = require ("http");
+var request = require ("request");
+var urlpack = require ("url");
+var AWS = require ("aws-sdk");
+var s3 = new AWS.S3 ();
 
-var myVersion = "0.79"; 
+var myVersion = "0.80"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -27,11 +32,7 @@ if (myPort == undefined) {
 var maxChanges = 100;
 var nameChangesFile = "changes.json";
 
-var http = require ("http");
-var request = require ("request");
-var urlpack = require ("url");
-var AWS = require ("aws-sdk");
-var s3 = new AWS.S3 ();
+var ctHits = 0, whenServerStart = new Date ();
 
 function consoleLog (s) {
 	console.log (new Date ().toLocaleTimeString () + " -- " + s);
@@ -339,6 +340,9 @@ console.log ("");
 http.createServer (function (httpRequest, httpResponse) {
 	var parsedUrl = urlpack.parse (httpRequest.url, true);
 	var lowercasepath = parsedUrl.pathname.toLowerCase ();
+	var now = new Date (), nowstring = now.toString ();
+	
+	ctHits++;
 	
 	//handle HEAD request
 		if (httpRequest.method == "HEAD") {
@@ -453,8 +457,22 @@ http.createServer (function (httpRequest, httpResponse) {
 			httpResponse.end (myVersion);    
 			break;
 		case "/now": //2/9/14 by DW
-			httpResponse.writeHead (200, {"Content-Type": "text/plain"});
-			httpResponse.end (new Date ().toString ());    
+			httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
+			httpResponse.end (nowstring);    
+			break;
+		case "/httpreadurl": //2/10/14 by DW
+			var type = "text/plain";
+			httpReadUrl (parsedUrl.query.url, function (s) {
+				if (parsedUrl.query.type != undefined) {
+					type = parsedUrl.query.type;
+					}
+				httpResponse.writeHead (200, {"Content-Type": type, "Access-Control-Allow-Origin": "*"});
+				httpResponse.end (s);    
+				});
+			break;
+		case "/status": //2/11/14 by DW
+			httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
+			httpResponse.end (JSON.stringify ({version: myVersion, now: now.toUTCString (), whenServerStart: whenServerStart.toUTCString (), hits: ctHits}, undefined, 4));    
 			break;
 		default:
 			httpResponse.writeHead (404, {"Content-Type": "text/plain"});

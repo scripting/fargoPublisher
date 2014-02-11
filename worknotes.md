@@ -1,3 +1,9 @@
+### 2/11/14 by DW
+
+<a href="http://fargo.io/blog/2014/02/11/fargoPublisher080.html">Updated publisher</a> to version 0.80. Two new API endpoints, one that returns server status in JSON, for monitoring apps and one that does an HTTP request for Fargo running in the browser. 
+
+
+
 ### 2/10/14 by DW
 
 <a href="http://fargo.io/blog/2014/02/10/newReleaseOfFargoPublisher.html">Updated publisher</a> to version 0.79. Now it redirects to user sites if you point the domain at the server.
