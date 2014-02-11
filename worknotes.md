@@ -1,5 +1,7 @@
 ### 2/11/14 by DW
 
+Version 0.82. Maintain a new stats file, httpLog.json.
+
 Version 0.81. Fixed a bug where redirects would recurse indefinitely. 
 
 <a href="http://fargo.io/blog/2014/02/11/fargoPublisher080.html">Version 0.80</a>. Two new API endpoints, one that returns server status in JSON, for monitoring apps and one that does an HTTP request for Fargo running in the browser. 

@@ -1,12 +1,12 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/11/2014; 1:55:49 PM Eastern.
+	//Last update: 2/11/2014; 3:53:58 PM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 
-var myVersion = "0.81"; 
+var myVersion = "0.82"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -30,8 +30,13 @@ if (myPort == undefined) {
 	}
 
 var maxChanges = 100, nameChangesFile = "changes.json";
+var maxHttpLog = 500, nameHttpLogFile = "httpLog.json";
 
-var ctHits = 0, whenServerStart = new Date (), httpLog = new Array (), maxHttpLog = 250, nameHttpLogFile = "httpLog.json";
+var serverStats = {
+	ctHits: 0,
+	whenServerStart: new Date (),
+	httpLog: []
+	};
 
 
 function consoleLog (s) {
@@ -257,11 +262,12 @@ function statsAddToHttpLog (host, url, urlRedirect) { //2/11/14 by DW
 	if (urlRedirect != undefined) {
 		obj.urlRedirect = urlRedirect;
 		}
-	httpLog.unshift (obj);  //add at beginning of array
-	while (httpLog.length > maxHttpLog) { //keep array within max size
-		httpLog.pop ();
+	serverStats.httpLog.unshift (obj);  //add at beginning of array
+	while (serverStats.httpLog.length > maxHttpLog) { //keep array within max size
+		serverStats.httpLog.pop ();
 		}
-	s3NewObject (s3StatsPath + nameHttpLogFile, JSON.stringify (httpLog, undefined, 3));
+	serverStats.ctHits++;
+	s3NewObject (s3StatsPath + nameHttpLogFile, JSON.stringify (serverStats, undefined, 3));
 	}
 function parsePackages (name, s) { //name is something like "dave"
 	var magicpattern = "<[{~#--- ", ix, path, htmltext, ctfiles = 0, ctchars = 0;
@@ -484,7 +490,7 @@ http.createServer (function (httpRequest, httpResponse) {
 			break;
 		case "/status": //2/11/14 by DW
 			httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
-			httpResponse.end (JSON.stringify ({version: myVersion, now: now.toUTCString (), whenServerStart: whenServerStart.toUTCString (), hits: ctHits}, undefined, 4));    
+			httpResponse.end (JSON.stringify ({version: myVersion, now: now.toUTCString (), whenServerStart: serverStats.whenServerStart.toUTCString (), hits: serverStats.ctHits}, undefined, 4));    
 			break;
 		default:
 			httpResponse.writeHead (404, {"Content-Type": "text/plain"});
@@ -493,5 +499,4 @@ http.createServer (function (httpRequest, httpResponse) {
 		}
 	
 	statsAddToHttpLog (httpRequest.headers.host, httpRequest.url); 
-	ctHits++;
 	}).listen (myPort);
