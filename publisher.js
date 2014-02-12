@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/11/2014; 8:38:57 PM Eastern.
+	//Last update: 2/11/2014; 11:27:19 PM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -264,8 +264,8 @@ function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage) { //2/11/14 
 	var obj = new Object ();
 	obj.when = new Date ().toUTCString ();
 	obj.url = "http://" + host + url;
-	if (httpRequest.socket.remoteAddress != undefined) {
-		obj.client = httpRequest.socket.remoteAddress;
+	if (httpRequest.connection.remoteAddress != undefined) {
+		obj.client = httpRequest.connection.remoteAddress;
 		}
 	if (urlRedirect != undefined) {
 		obj.urlRedirect = urlRedirect;
