@@ -1,12 +1,12 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/11/2014; 3:53:58 PM Eastern.
+	//Last update: 2/11/2014; 7:25:11 PM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 
-var myVersion = "0.82"; 
+var myVersion = "0.83"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -33,8 +33,9 @@ var maxChanges = 100, nameChangesFile = "changes.json";
 var maxHttpLog = 500, nameHttpLogFile = "httpLog.json";
 
 var serverStats = {
-	ctHits: 0,
-	whenServerStart: new Date (),
+	ctHits: 0, 
+	ctHitsThisRun: 0,
+	whenServerStart: 0,
 	httpLog: []
 	};
 
@@ -255,19 +256,32 @@ function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by D
 		s3NewObject (path, JSON.stringify (changes, undefined, 3));
 		});
 	}
-function statsAddToHttpLog (host, url, urlRedirect) { //2/11/14 by DW
+function statsAddToHttpLog (host, url, urlRedirect, errorMessage) { //2/11/14 by DW
 	var obj = new Object ();
 	obj.when = new Date ().toUTCString ();
 	obj.url = "http://" + host + url;
 	if (urlRedirect != undefined) {
 		obj.urlRedirect = urlRedirect;
 		}
+	if (errorMessage != undefined) {
+		obj.errorMessage = errorMessage;
+		}
 	serverStats.httpLog.unshift (obj);  //add at beginning of array
 	while (serverStats.httpLog.length > maxHttpLog) { //keep array within max size
 		serverStats.httpLog.pop ();
 		}
 	serverStats.ctHits++;
+	serverStats.ctHitsThisRun++;
 	s3NewObject (s3StatsPath + nameHttpLogFile, JSON.stringify (serverStats, undefined, 3));
+	}
+function loadServerStats () {
+	s3GetObject (s3StatsPath + nameHttpLogFile, function (data) {
+		if (data != null) {
+			serverStats = JSON.parse (data.Body);
+			serverStats.ctHitsThisRun = 0;
+			serverStats.whenServerStart = new Date ().toUTCString ()
+			}
+		});
 	}
 function parsePackages (name, s) { //name is something like "dave"
 	var magicpattern = "<[{~#--- ", ix, path, htmltext, ctfiles = 0, ctchars = 0;
@@ -355,148 +369,156 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	console.log ("Domain == " + myDomain + ".");
 	console.log ("Port == " + myPort + ".");
 	console.log ("");
+//get previous serverStats -- 2/11/14 by DW
+	loadServerStats ();
 
 http.createServer (function (httpRequest, httpResponse) {
-	var parsedUrl = urlpack.parse (httpRequest.url, true);
-	var lowercasepath = parsedUrl.pathname.toLowerCase ();
-	var now = new Date (), nowstring = now.toString ();
-	
-	//handle HEAD request
-		if (httpRequest.method == "HEAD") {
-			httpRequest.end (null);
-			return;
-			}
-	//handle redirect through the domain we're managing -- 2/10/14 by DW
-		var host = httpRequest.headers.host;
-		var lowerhost = host.toLowerCase ();
-		var lowerdomain = myDomain.toLowerCase ();
-		if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com
-			var newurl = "http:/" + s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
-			httpResponse.writeHead (302, {"location": newurl});
-			httpResponse.end ("302 REDIRECT");    
-			statsAddToHttpLog (httpRequest.headers.host, httpRequest.url, newurl); 
-			return;
-			}
-	
-	switch (lowercasepath) {
-		case "/pingpackage":
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			
-			handlePackagePing (parsedUrl.query.link);
-			
-			var x = {"url": parsedUrl.query.link};
-			var s = "getData (" + JSON.stringify (x) + ")";
-			httpResponse.end (s);    
-			
-			break;
-		case "/isnameavailable":
-			function sendStringBack (s) {
-				var x = {"message": s};
-				httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+	try {
+		var parsedUrl = urlpack.parse (httpRequest.url, true);
+		var lowercasepath = parsedUrl.pathname.toLowerCase ();
+		var now = new Date (), nowstring = now.toString ();
+		
+		//handle HEAD request
+			if (httpRequest.method == "HEAD") {
+				httpRequest.end ("");
+				return;
 				}
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			
-			var name = cleanName (parsedUrl.query.name);
-			
-			consoleLog ("Is name available? name == " + name);
-			
-			if (name.length == 0) {
-				sendStringBack ("");    
+		//handle redirect through the domain we're managing -- 2/10/14 by DW
+			var host = httpRequest.headers.host;
+			var lowerhost = host.toLowerCase ();
+			var lowerdomain = myDomain.toLowerCase ();
+			if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com
+				var newurl = "http:/" + s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
+				httpResponse.writeHead (302, {"location": newurl});
+				httpResponse.end ("302 REDIRECT");    
+				statsAddToHttpLog (httpRequest.headers.host, httpRequest.url, newurl); 
+				return;
 				}
-			else {
-				if (name.length < 4) {
-					sendStringBack ("Name must be 4 or more characters.");
+		
+		switch (lowercasepath) {
+			case "/pingpackage":
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				
+				handlePackagePing (parsedUrl.query.link);
+				
+				var x = {"url": parsedUrl.query.link};
+				var s = "getData (" + JSON.stringify (x) + ")";
+				httpResponse.end (s);    
+				
+				break;
+			case "/isnameavailable":
+				function sendStringBack (s) {
+					var x = {"message": s};
+					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+					}
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				
+				var name = cleanName (parsedUrl.query.name);
+				
+				consoleLog ("Is name available? name == " + name);
+				
+				if (name.length == 0) {
+					sendStringBack ("");    
 					}
 				else {
-					isNameDefined (name, function (fldefined) {
-						var color, answer;
+					if (name.length < 4) {
+						sendStringBack ("Name must be 4 or more characters.");
+						}
+					else {
+						isNameDefined (name, function (fldefined) {
+							var color, answer;
+							if (fldefined) {
+								color = "red";
+								answer = "is not";
+								}
+							else {
+								color = "green";
+								answer = "is";
+								}
+							sendStringBack ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
+							});
+						}
+					}
+				
+				break;
+			case "/newoutlinename":
+				var recordkey = cleanName (parsedUrl.query.name), url = parsedUrl.query.url;
+				
+				consoleLog ("Create new outline name: " + recordkey + ", url=" + url);
+				
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				
+				if (url == undefined) {
+					var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
+					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+					}
+				else {
+					isNameDefined (recordkey, function (fldefined) {
 						if (fldefined) {
-							color = "red";
-							answer = "is not";
+							var x = {flError: true, errorString: "Can't assign the name '" + recordkey + "' to the outline because there already is an outline with that name."};
+							httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 							}
 						else {
-							color = "green";
-							answer = "is";
+							addNameRecord (recordkey, url, function (err, data) {
+								if (err) {
+									httpResponse.end ("getData (" + JSON.stringify (err) + ")");    
+									}
+								else {
+									var x = {flError: false, name: recordkey + "." + myDomain};
+									httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
+									}
+								});
 							}
-						sendStringBack ("<span style=\"color: " + color + ";\">" + name + "." + myDomain + " " + answer + " available.</span>")
 						});
 					}
-				}
-			
-			break;
-		case "/newoutlinename":
-			var recordkey = cleanName (parsedUrl.query.name), url = parsedUrl.query.url;
-			
-			consoleLog ("Create new outline name: " + recordkey + ", url=" + url);
-			
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			
-			if (url == undefined) {
-				var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
-				httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-				}
-			else {
-				isNameDefined (recordkey, function (fldefined) {
-					if (fldefined) {
-						var x = {flError: true, errorString: "Can't assign the name '" + recordkey + "' to the outline because there already is an outline with that name."};
+				break;
+			case "/geturlfromname":
+				var name = cleanName (parsedUrl.query.name);
+				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
+				getNameRecord (name, function (jsontext) {
+					if (jsontext == null) {
+						var x = {flError: true, errorString: "Can't open the outline named '" + name + "' because there is no outline with that name."};
 						httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 						}
 					else {
-						addNameRecord (recordkey, url, function (err, data) {
-							if (err) {
-								httpResponse.end ("getData (" + JSON.stringify (err) + ")");    
-								}
-							else {
-								var x = {flError: false, name: recordkey + "." + myDomain};
-								httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-								}
-							});
+						var obj = JSON.parse (jsontext);
+						var x = {flError: false, url: obj.opmlUrl};
+						httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 						}
 					});
-				}
-			break;
-		case "/geturlfromname":
-			var name = cleanName (parsedUrl.query.name);
-			httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-			getNameRecord (name, function (jsontext) {
-				if (jsontext == null) {
-					var x = {flError: true, errorString: "Can't open the outline named '" + name + "' because there is no outline with that name."};
-					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-					}
-				else {
-					var obj = JSON.parse (jsontext);
-					var x = {flError: false, url: obj.opmlUrl};
-					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
-					}
-				});
-			break;
-		case "/version":
-			httpResponse.writeHead (200, {"Content-Type": "text/plain"});
-			httpResponse.end (myVersion);    
-			break;
-		case "/now": //2/9/14 by DW
-			httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
-			httpResponse.end (nowstring);    
-			break;
-		case "/httpreadurl": //2/10/14 by DW
-			var type = "text/plain";
-			httpReadUrl (parsedUrl.query.url, function (s) {
-				if (parsedUrl.query.type != undefined) {
-					type = parsedUrl.query.type;
-					}
-				httpResponse.writeHead (200, {"Content-Type": type, "Access-Control-Allow-Origin": "*"});
-				httpResponse.end (s);    
-				});
-			break;
-		case "/status": //2/11/14 by DW
-			httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
-			httpResponse.end (JSON.stringify ({version: myVersion, now: now.toUTCString (), whenServerStart: serverStats.whenServerStart.toUTCString (), hits: serverStats.ctHits}, undefined, 4));    
-			break;
-		default:
-			httpResponse.writeHead (404, {"Content-Type": "text/plain"});
-			httpResponse.end ("\"" + parsedUrl.pathname + "\" is not one of the endpoints defined by the Fargo Publsiher API.");
-			break;
+				break;
+			case "/version":
+				httpResponse.writeHead (200, {"Content-Type": "text/plain"});
+				httpResponse.end (myVersion);    
+				break;
+			case "/now": //2/9/14 by DW
+				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
+				httpResponse.end (nowstring);    
+				break;
+			case "/httpreadurl": //2/10/14 by DW
+				var type = "text/plain";
+				httpReadUrl (parsedUrl.query.url, function (s) {
+					if (parsedUrl.query.type != undefined) {
+						type = parsedUrl.query.type;
+						}
+					httpResponse.writeHead (200, {"Content-Type": type, "Access-Control-Allow-Origin": "*"});
+					httpResponse.end (s);    
+					});
+				break;
+			case "/status": //2/11/14 by DW
+				var whenServerStartString = new Date (serverStats.whenServerStart).toUTCString ();
+				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
+				httpResponse.end (JSON.stringify ({version: myVersion, now: now.toUTCString (), whenServerStart: whenServerStartString, hits: serverStats.ctHits}, undefined, 4));    
+				break;
+			default:
+				httpResponse.writeHead (404, {"Content-Type": "text/plain"});
+				httpResponse.end ("\"" + parsedUrl.pathname + "\" is not one of the endpoints defined by the Fargo Publsiher API.");
+				break;
+			}
+		
+		statsAddToHttpLog (httpRequest.headers.host, httpRequest.url); 
 		}
-	
-	statsAddToHttpLog (httpRequest.headers.host, httpRequest.url); 
+	catch (tryError) {
+		statsAddToHttpLog (httpRequest.headers.host, httpRequest.url, undefined, tryError.message); 
+		}
 	}).listen (myPort);

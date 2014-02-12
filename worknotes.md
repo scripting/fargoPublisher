@@ -1,5 +1,7 @@
 ### 2/11/14 by DW
 
+Version 0.83 fixes bugs added in 0.82. Hardened the server, so it reports its own errors in the log file instead of crashing. 
+
 Version 0.82. Maintain a new stats file, httpLog.json.
 
 Version 0.81. Fixed a bug where redirects would recurse indefinitely. 
