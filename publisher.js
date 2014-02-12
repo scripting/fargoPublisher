@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/11/2014; 11:27:19 PM Eastern.
+	//Last update: 2/12/2014; 3:36:55 AM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -405,8 +405,8 @@ http.createServer (function (httpRequest, httpResponse) {
 			if (serverPrefs.redirects [lowerhost] != undefined) {
 				var newurl = "http://" + serverPrefs.redirects [lowerhost] + parsedUrl.pathname;
 				httpResponse.writeHead (302, {"location": newurl});
-				httpResponse.end ("302 REDIRECT");    
 				statsAddToHttpLog (httpRequest, newurl); 
+				httpResponse.end ("302 REDIRECT");    
 				return;
 				}
 		//handle redirect through the domain we're managing -- 2/10/14 by DW
@@ -414,10 +414,11 @@ http.createServer (function (httpRequest, httpResponse) {
 			if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com
 				var newurl = "http:/" + s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
 				httpResponse.writeHead (302, {"location": newurl});
-				httpResponse.end ("302 REDIRECT");    
 				statsAddToHttpLog (httpRequest, newurl); 
+				httpResponse.end ("302 REDIRECT");    
 				return;
 				}
+		statsAddToHttpLog (httpRequest); 
 		
 		switch (lowercasepath) {
 			case "/pingpackage":
@@ -539,8 +540,6 @@ http.createServer (function (httpRequest, httpResponse) {
 				httpResponse.end ("\"" + parsedUrl.pathname + "\" is not one of the endpoints defined by the Fargo Publsiher API.");
 				break;
 			}
-		
-		statsAddToHttpLog (httpRequest); 
 		}
 	catch (tryError) {
 		statsAddToHttpLog (httpRequest, undefined, tryError.message); 
