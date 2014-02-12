@@ -1,5 +1,7 @@
 ### 2/12/14 by DW
 
+Version 0.85 implements hits-all-time and hits-today, and rolls over the date at midnight GMT.
+
 Version 0.84 does a reverse DNS lookup on the client IP address. However it doesn't yield much useful info, as you can see from my <a href="http://beta.fargo.io/data/stats/httpLog.json">httpLog file</a>.
 
 

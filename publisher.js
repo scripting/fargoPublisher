@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/12/2014; 10:26:53 AM Eastern.
+	//Last update: 2/12/2014; 11:18:04 AM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -7,7 +7,7 @@ var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var dns = require ("dns");
 
-var myVersion = "0.84"; 
+var myVersion = "0.85"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -38,8 +38,10 @@ var serverPrefs; //loaded at startup from prefs.json in the prefs folder on S3 -
 var namePrefsFile = "prefs.json";
 
 var serverStats = {
+	today: 0,
 	ctHits: 0, 
 	ctHitsThisRun: 0,
+	ctHitsToday: 0,
 	whenServerStart: 0,
 	httpLog: []
 	};
@@ -136,6 +138,12 @@ function scrapeTagValue (sourcestring, tagname) {
 			}
 		}
 	return ("");
+	}
+function sameDay (d1, d2) { 
+	//returns true if the two dates are on the same day
+	d1 = new Date (d1);
+	d2 = new Date (d2);
+	return ((d1.getFullYear () == d2.getFullYear ()) && (d1.getMonth () == d2.getMonth ()) && (d1.getDate () == d2.getDate ()));
 	}
 function httpReadUrl (url, callback) {
 	request (url, function (error, response, body) {
@@ -271,9 +279,16 @@ function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by D
 		});
 	}
 function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage) { //2/11/14 by DW
-	var host = httpRequest.headers.host, url = httpRequest.url, ip = httpRequest.connection.remoteAddress;
+	var host = httpRequest.headers.host, url = httpRequest.url, ip = httpRequest.connection.remoteAddress, now = new Date ();
+	
 	serverStats.ctHits++;
 	serverStats.ctHitsThisRun++;
+	if (!sameDay (serverStats.today, now)) { //date rollover
+		serverStats.today = now;
+		serverStats.ctHitsToday = 0;
+		}
+	serverStats.ctHitsToday++;
+	
 	var obj = new Object ();
 	obj.when = new Date ().toUTCString ();
 	obj.url = "http://" + host + url;
@@ -309,7 +324,13 @@ function loadServerStats () {
 		if (data != null) {
 			serverStats = JSON.parse (data.Body);
 			serverStats.ctHitsThisRun = 0;
-			serverStats.whenServerStart = new Date ().toUTCString ()
+			if (serverStats.ctHitsToday == undefined) {
+				serverStats.ctHitsToday = 0;
+				}
+			if (serverStats.today == undefined) {
+				serverStats.today = new Date ().toUTCString ();
+				}
+			serverStats.whenServerStart = new Date ().toUTCString ();
 			}
 		});
 	}
@@ -554,9 +575,15 @@ http.createServer (function (httpRequest, httpResponse) {
 					});
 				break;
 			case "/status": //2/11/14 by DW
-				var whenServerStartString = new Date (serverStats.whenServerStart).toUTCString ();
+				var myStatus = {
+					version: myVersion, 
+					now: now.toUTCString (), 
+					whenServerStart: new Date (serverStats.whenServerStart).toUTCString (), 
+					hits: serverStats.ctHits, 
+					hitsToday: serverStats.ctHitsToday
+					};
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
-				httpResponse.end (JSON.stringify ({version: myVersion, now: now.toUTCString (), whenServerStart: whenServerStartString, hits: serverStats.ctHits}, undefined, 4));    
+				httpResponse.end (JSON.stringify (myStatus, undefined, 4));    
 				break;
 			default:
 				httpResponse.writeHead (404, {"Content-Type": "text/plain"});
