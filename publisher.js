@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/11/2014; 7:25:11 PM Eastern.
+	//Last update: 2/11/2014; 8:38:57 PM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -15,6 +15,7 @@ var s3defaultAcl = "public-read";
 var s3DataPath = process.env.fpDataPath;
 var s3NamesPath = s3DataPath + "names/"; 
 var s3StatsPath = s3DataPath + "stats/"; 
+var s3SPrefsPath = s3DataPath + "prefs/"; 
 
 var myDomain = process.env.fpDomain; //something like smallpict.com
 
@@ -32,13 +33,15 @@ if (myPort == undefined) {
 var maxChanges = 100, nameChangesFile = "changes.json";
 var maxHttpLog = 500, nameHttpLogFile = "httpLog.json";
 
+var serverPrefs; //loaded at startup from prefs.json in the prefs folder on S3 -- 2/11/14 by DW
+var namePrefsFile = "prefs.json";
+
 var serverStats = {
 	ctHits: 0, 
 	ctHitsThisRun: 0,
 	whenServerStart: 0,
 	httpLog: []
 	};
-
 
 function consoleLog (s) {
 	console.log (new Date ().toLocaleTimeString () + " -- " + s);
@@ -256,10 +259,14 @@ function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by D
 		s3NewObject (path, JSON.stringify (changes, undefined, 3));
 		});
 	}
-function statsAddToHttpLog (host, url, urlRedirect, errorMessage) { //2/11/14 by DW
+function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage) { //2/11/14 by DW
+	var host = httpRequest.headers.host, url = httpRequest.url;
 	var obj = new Object ();
 	obj.when = new Date ().toUTCString ();
 	obj.url = "http://" + host + url;
+	if (httpRequest.socket.remoteAddress != undefined) {
+		obj.client = httpRequest.socket.remoteAddress;
+		}
 	if (urlRedirect != undefined) {
 		obj.urlRedirect = urlRedirect;
 		}
@@ -280,6 +287,14 @@ function loadServerStats () {
 			serverStats = JSON.parse (data.Body);
 			serverStats.ctHitsThisRun = 0;
 			serverStats.whenServerStart = new Date ().toUTCString ()
+			}
+		});
+	}
+function loadServerPrefs () {
+	s3GetObject (s3SPrefsPath + namePrefsFile, function (data) {
+		if (data != null) {
+			serverPrefs = JSON.parse (data.Body);
+			consoleLog ("loadServerPrefs: " + data.Body);
 			}
 		});
 	}
@@ -369,7 +384,8 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	console.log ("Domain == " + myDomain + ".");
 	console.log ("Port == " + myPort + ".");
 	console.log ("");
-//get previous serverStats -- 2/11/14 by DW
+//get previous stats, prefs -- 2/11/14 by DW
+	loadServerPrefs ();
 	loadServerStats ();
 
 http.createServer (function (httpRequest, httpResponse) {
@@ -377,21 +393,29 @@ http.createServer (function (httpRequest, httpResponse) {
 		var parsedUrl = urlpack.parse (httpRequest.url, true);
 		var lowercasepath = parsedUrl.pathname.toLowerCase ();
 		var now = new Date (), nowstring = now.toString ();
+		var host = httpRequest.headers.host;
+		var lowerhost = host.toLowerCase ();
 		
 		//handle HEAD request
 			if (httpRequest.method == "HEAD") {
 				httpRequest.end ("");
 				return;
 				}
+		//handle redirect through the prefs/redirects table -- 2/11/14 by DW
+			if (serverPrefs.redirects [lowerhost] != undefined) {
+				var newurl = "http://" + serverPrefs.redirects [lowerhost] + parsedUrl.pathname;
+				httpResponse.writeHead (302, {"location": newurl});
+				httpResponse.end ("302 REDIRECT");    
+				statsAddToHttpLog (httpRequest, newurl); 
+				return;
+				}
 		//handle redirect through the domain we're managing -- 2/10/14 by DW
-			var host = httpRequest.headers.host;
-			var lowerhost = host.toLowerCase ();
 			var lowerdomain = myDomain.toLowerCase ();
 			if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com
 				var newurl = "http:/" + s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
 				httpResponse.writeHead (302, {"location": newurl});
 				httpResponse.end ("302 REDIRECT");    
-				statsAddToHttpLog (httpRequest.headers.host, httpRequest.url, newurl); 
+				statsAddToHttpLog (httpRequest, newurl); 
 				return;
 				}
 		
@@ -516,9 +540,9 @@ http.createServer (function (httpRequest, httpResponse) {
 				break;
 			}
 		
-		statsAddToHttpLog (httpRequest.headers.host, httpRequest.url); 
+		statsAddToHttpLog (httpRequest); 
 		}
 	catch (tryError) {
-		statsAddToHttpLog (httpRequest.headers.host, httpRequest.url, undefined, tryError.message); 
+		statsAddToHttpLog (httpRequest, undefined, tryError.message); 
 		}
 	}).listen (myPort);
