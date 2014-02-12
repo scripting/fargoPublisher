@@ -1,3 +1,9 @@
+### 2/12/14 by DW
+
+Version 0.84 does a reverse DNS lookup on the client IP address. However it doesn't yield much useful info, as you can see from my <a href="http://beta.fargo.io/data/stats/httpLog.json">httpLog file</a>.
+
+
+
 ### 2/11/14 by DW
 
 Version 0.83 fixes bugs added in 0.82. Hardened the server, so it reports its own errors in the log file instead of crashing. 

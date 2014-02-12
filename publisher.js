@@ -1,12 +1,13 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/12/2014; 3:36:55 AM Eastern.
+	//Last update: 2/12/2014; 10:26:53 AM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
+var dns = require ("dns");
 
-var myVersion = "0.83"; 
+var myVersion = "0.84"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -111,6 +112,16 @@ function tcpGetMyIpAddress () {
 				}
 		}
 	return ("0.0.0.0");
+	}
+function tcpGetDomainName (ip, callback) {
+	dns.reverse (ip, function (err, domains) {
+		if (err != null) {
+			callback (ip); //use the IP address in place of the domain name
+			}
+		else {
+			callback (domains); 
+			}
+		});
 	}
 function scrapeTagValue (sourcestring, tagname) {
 	var s = sourcestring; //work with a copy
@@ -260,26 +271,38 @@ function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by D
 		});
 	}
 function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage) { //2/11/14 by DW
-	var host = httpRequest.headers.host, url = httpRequest.url;
+	var host = httpRequest.headers.host, url = httpRequest.url, ip = httpRequest.connection.remoteAddress;
+	serverStats.ctHits++;
+	serverStats.ctHitsThisRun++;
 	var obj = new Object ();
 	obj.when = new Date ().toUTCString ();
 	obj.url = "http://" + host + url;
-	if (httpRequest.connection.remoteAddress != undefined) {
-		obj.client = httpRequest.connection.remoteAddress;
-		}
 	if (urlRedirect != undefined) {
 		obj.urlRedirect = urlRedirect;
 		}
 	if (errorMessage != undefined) {
 		obj.errorMessage = errorMessage;
 		}
-	serverStats.httpLog.unshift (obj);  //add at beginning of array
-	while (serverStats.httpLog.length > maxHttpLog) { //keep array within max size
-		serverStats.httpLog.pop ();
+	
+	function finishLogAdd () {
+		serverStats.httpLog.unshift (obj);  //add at beginning of array
+		while (serverStats.httpLog.length > maxHttpLog) { //keep array within max size
+			serverStats.httpLog.pop ();
+			}
+		s3NewObject (s3StatsPath + nameHttpLogFile, JSON.stringify (serverStats, undefined, 3));
 		}
-	serverStats.ctHits++;
-	serverStats.ctHitsThisRun++;
-	s3NewObject (s3StatsPath + nameHttpLogFile, JSON.stringify (serverStats, undefined, 3));
+	
+	if (ip != undefined) {
+		tcpGetDomainName (ip, function (domains) {
+			obj.clientIp = ip;
+			obj.clientNames = domains;
+			finishLogAdd ();
+			});
+		}
+	else {
+		finishLogAdd ();
+		}
+	
 	}
 function loadServerStats () {
 	s3GetObject (s3StatsPath + nameHttpLogFile, function (data) {
