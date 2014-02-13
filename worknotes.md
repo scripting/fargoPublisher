@@ -1,3 +1,9 @@
+### 2/13/14 by DW
+
+v0.86 implements the httpurlschanged enpoint. It gets a set of URLs and returns the dates when they last changed. Used in the Fargo for Workgroups feature. 
+
+
+
 ### 2/12/14 by DW
 
 Version 0.85 implements hits-all-time and hits-today, and rolls over the date at midnight GMT.

@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/12/2014; 11:18:04 AM Eastern.
+	//Last update: 2/13/2014; 11:52:54 AM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -7,7 +7,7 @@ var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var dns = require ("dns");
 
-var myVersion = "0.85"; 
+var myVersion = "0.86"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -45,6 +45,9 @@ var serverStats = {
 	whenServerStart: 0,
 	httpLog: []
 	};
+
+var urlsChangedData = []; //used in the /httpurlschanged endpoint -- 2/13/14 by DW
+
 
 function consoleLog (s) {
 	console.log (new Date ().toLocaleTimeString () + " -- " + s);
@@ -584,6 +587,74 @@ http.createServer (function (httpRequest, httpResponse) {
 					};
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
 				httpResponse.end (JSON.stringify (myStatus, undefined, 4));    
+				break;
+			case "/httpurlschanged": //2/13/14 by DW
+				var urlarray = [], returnstruct = {url: []}, ct = 1;
+				function doArrayCheck (urlarray, ix, callback) {
+					if (ix < urlarray.length) {
+						var url = urlarray [ix], eTag = "";
+						if (urlsChangedData [url] != undefined) {
+							if (urlsChangedData [url].etag != undefined) {
+								eTag = urlsChangedData [url].etag;
+								}
+							}
+						var options = {
+							uri: url,
+							headers: {}
+							};
+						if (eTag.length > 0) {
+							options.headers ["If-None-Match"] = eTag;
+							}
+						request (options, function (error, response, body) {
+							if (!error) {
+								if ((response.statusCode == 200) || (response.statusCode == 304)) {
+									if (callback != undefined) {
+										callback (ix, response, body);
+										}
+									doArrayCheck (urlarray, ix + 1, callback);
+									}
+								}
+							});
+						}
+					else {
+						httpResponse.writeHead (200, {"Content-Type": "application/json"});
+						httpResponse.end ("getData (" + JSON.stringify (returnstruct) + ")");    
+						
+						}
+					}
+				while (true) { //get the urlX params into urlarray
+					var paramname = "url" + ct++;
+					if (parsedUrl.query [paramname] == undefined) { //ran out of urls
+						break;
+						}
+					urlarray [urlarray.length] = parsedUrl.query [paramname];
+					}
+				
+				doArrayCheck (urlarray, 0, function (ixarray, response, body) {
+					var url = urlarray [ixarray], now = new Date ();
+					if (urlsChangedData [url] == undefined) {
+						var obj = new Object ();
+						obj.whenLastCheck = now;
+						obj.ctChecks = 0;
+						obj.ctChanges = 0;
+						urlsChangedData [url] = obj;
+						}
+					if (response.headers.etag != undefined) {
+						urlsChangedData [url].etag = response.headers.etag;
+						}
+					urlsChangedData [url].whenLastCheck = now;
+					urlsChangedData [url].ctChecks++;
+					consoleLog ("callback: urlsChangedData [" + url + "] == " + JSON.stringify (urlsChangedData [url]));
+					if (response.statusCode == 304) { //no change
+						returnstruct.url [ixarray] = urlsChangedData [url].whenLastChange.toUTCString ();
+						}
+					else {
+						urlsChangedData [url].ctChanges++;
+						urlsChangedData [url].whenLastChange = now;
+						returnstruct.url [ixarray] = now.toUTCString ();
+						}
+					});
+				
 				break;
 			default:
 				httpResponse.writeHead (404, {"Content-Type": "text/plain"});
