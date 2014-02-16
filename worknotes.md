@@ -1,6 +1,12 @@
+### 2/15/14 by DW
+
+v0.87 implements the getenclosureinfo endpoint. It takes a URL as a parameter, and returns the length and type of the file it points to. This is used in creating the &lt;enclosure> elements in RSS feeds.
+
+
+
 ### 2/13/14 by DW
 
-v0.86 implements the httpurlschanged enpoint. It gets a set of URLs and returns the dates when they last changed. Used in the Fargo for Workgroups feature. 
+v0.86 implements the httpurlschanged enpoint. It gets a set of URLs and returns the dates when they last changed. Used in the <a href="http://fargo.io/docs/workgroup.html">Fargo for Workgroups</a> feature. 
 
 
 

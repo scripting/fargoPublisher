@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/13/2014; 11:52:54 AM Eastern.
+	//Last update: 2/15/2014; 7:41:18 PM Eastern.
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -7,7 +7,7 @@ var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var dns = require ("dns");
 
-var myVersion = "0.86"; 
+var myVersion = "0.87"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -655,6 +655,28 @@ http.createServer (function (httpRequest, httpResponse) {
 						}
 					});
 				
+				break;
+			case "/getenclosureinfo": //2/15/14 by DW
+				if (parsedUrl.query.url != undefined) {
+					var options = {
+						uri: parsedUrl.query.url,
+						method: "HEAD"
+						};
+					request (options, function (error, response, body) {
+						var flhaveresult = false;
+						if (!error) {
+							if (response.statusCode == 200) {
+								httpResponse.writeHead (200, {"Content-Type": "application/json"});
+								httpResponse.end ("getData (" + JSON.stringify ({length: response.headers ["content-length"], type: response.headers ["content-type"]}) + ")");    
+								flhaveresult = true;
+								}
+							}
+						if (!flhaveresult) {
+							httpResponse.writeHead (200, {"Content-Type": "application/json"});
+							httpResponse.end ("getData (" + JSON.stringify ({flError: true}) + ")");
+							}
+						});
+					}
 				break;
 			default:
 				httpResponse.writeHead (404, {"Content-Type": "text/plain"});
