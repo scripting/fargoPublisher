@@ -1,3 +1,9 @@
+### 2/17/14 by DW
+
+<a href="http://fargo.io/blog/2014/02/17/fargoPublisher088.html">v.088</a> implements a new configuration option, whether you want Publisher to redirect to the content stored on S3 or serve it directly. 
+
+
+
 ### 2/15/14 by DW
 
 v0.87 implements the getenclosureinfo endpoint. It takes a URL as a parameter, and returns the length and type of the file it points to. This is used in creating the &lt;enclosure> elements in RSS feeds.

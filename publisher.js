@@ -1,5 +1,7 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/15/2014; 7:41:18 PM Eastern.
+	//Last update: 2/17/2014; 12:31:51 PM Eastern.
+var myVersion = "0.88"; 
+
 var http = require ("http");
 var request = require ("request");
 var urlpack = require ("url");
@@ -7,7 +9,6 @@ var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var dns = require ("dns");
 
-var myVersion = "0.87"; 
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
@@ -19,6 +20,16 @@ var s3StatsPath = s3DataPath + "stats/";
 var s3SPrefsPath = s3DataPath + "prefs/"; 
 
 var myDomain = process.env.fpDomain; //something like smallpict.com
+
+var flRedirect = process.env.fpRedirect; //if false, we just return the content from the s3 cache, instead of redirecting to it -- 2/17/14 by DW
+if (flRedirect == undefined) {
+	flRedirect = true;
+	console.log ("process.env.fpRedirect is undefined");
+	}
+else {
+	flRedirect = getBoolean (flRedirect);
+	console.log ("process.env.fpRedirect" == process.env.fpRedirect);
+	}
 
 var myPort;
 if (process.env.PORT == undefined) { //it's not Heroku -- 2/1/14 by DW
@@ -105,6 +116,24 @@ function cleanName (name) {
 function getNameFromSubdomain (subdomain) {
 	var sections = subdomain.split (".");
 	return (sections [0]);
+	}
+function getBoolean (val) { 
+	switch (typeof (val)) {
+		case "string":
+			if (stringLower (val) == "true") {
+				return (true);
+				}
+			break;
+		case "boolean":
+			return (val);
+			break;
+		case "number":
+			if (val == 1) {
+				return (true);
+				}
+			break;
+		}
+	return (false);
 	}
 function tcpGetMyIpAddress () {
 	var interfaces = require ("os").networkInterfaces ();
@@ -430,6 +459,9 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 	console.log ("S3 stats path == " + s3StatsPath + ".");
 	console.log ("Domain == " + myDomain + ".");
 	console.log ("Port == " + myPort + ".");
+	console.log ("Redirect == " + getBoolean (flRedirect) + ".");
+	
+	
 	console.log ("");
 //get previous stats, prefs -- 2/11/14 by DW
 	loadServerPrefs ();
@@ -459,10 +491,29 @@ http.createServer (function (httpRequest, httpResponse) {
 		//handle redirect through the domain we're managing -- 2/10/14 by DW
 			var lowerdomain = myDomain.toLowerCase ();
 			if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com
-				var newurl = "http:/" + s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
-				httpResponse.writeHead (302, {"location": newurl});
-				statsAddToHttpLog (httpRequest, newurl); 
-				httpResponse.end ("302 REDIRECT");    
+				var s3path = s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
+				if (flRedirect) { //2/17/14 by DW
+					var newurl = "http:/" + s3path;
+					console.log ("redirect to " + newurl);
+					httpResponse.writeHead (302, {"location": newurl});
+					statsAddToHttpLog (httpRequest, newurl); 
+					httpResponse.end ("302 REDIRECT");    
+					}
+				else {
+					console.log ("get content of " + s3path);
+					s3GetObject (s3path, function (data) {
+						if (data == null) {
+							httpResponse.writeHead (404, {"Content-Type": "text/plain"});
+							statsAddToHttpLog (httpRequest); 
+							httpResponse.end ("There is no content to display at \"" + s3path + "\".");
+							}
+						else {
+							httpResponse.writeHead (200, {"Content-Type": "text/html"});
+							statsAddToHttpLog (httpRequest); 
+							httpResponse.end (data.Body);    
+							}
+						});
+					}
 				return;
 				}
 		statsAddToHttpLog (httpRequest); 
