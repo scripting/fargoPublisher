@@ -1,6 +1,6 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/17/2014; 12:31:51 PM Eastern.
-var myVersion = "0.88"; 
+	//Last update: 2/19/2014; 11:47:41 AM Eastern.
+var myVersion = "0.89"; 
 
 var http = require ("http");
 var request = require ("request");
@@ -24,11 +24,9 @@ var myDomain = process.env.fpDomain; //something like smallpict.com
 var flRedirect = process.env.fpRedirect; //if false, we just return the content from the s3 cache, instead of redirecting to it -- 2/17/14 by DW
 if (flRedirect == undefined) {
 	flRedirect = true;
-	console.log ("process.env.fpRedirect is undefined");
 	}
 else {
 	flRedirect = getBoolean (flRedirect);
-	console.log ("process.env.fpRedirect" == process.env.fpRedirect);
 	}
 
 var myPort;
@@ -494,13 +492,16 @@ http.createServer (function (httpRequest, httpResponse) {
 				var s3path = s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
 				if (flRedirect) { //2/17/14 by DW
 					var newurl = "http:/" + s3path;
-					console.log ("redirect to " + newurl);
 					httpResponse.writeHead (302, {"location": newurl});
 					statsAddToHttpLog (httpRequest, newurl); 
 					httpResponse.end ("302 REDIRECT");    
 					}
 				else {
-					console.log ("get content of " + s3path);
+					
+					if (endsWith (s3path, "/")) { //2/19/14 by DW
+						s3path += "index.html";
+						}
+					
 					s3GetObject (s3path, function (data) {
 						if (data == null) {
 							httpResponse.writeHead (404, {"Content-Type": "text/plain"});

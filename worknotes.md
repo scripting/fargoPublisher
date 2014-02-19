@@ -1,3 +1,9 @@
+### 2/19/14 AM by DW
+
+v0.89 -- if we're not redirecting, and the path ends with "/", get index.html. Pretty standard server stuff.
+
+
+
 ### 2/17/14 by DW
 
 <a href="http://fargo.io/blog/2014/02/17/fargoPublisher088.html">v.088</a> implements a new configuration option, whether you want Publisher to redirect to the content stored on S3 or serve it directly. 
