@@ -1,8 +1,8 @@
 ### What is Fargo Publisher? 
 
-Fargo Publisher is a node.js app that connects to <a href="http://fargo.io/">Fargo</a> to publish a folder of HTML docs.
+Fargo Publisher is a <a href="http://nodejs.org/">node.js</a> app that connects to <a href="http://fargo.io/">Fargo</a> to publish a folder of HTML docs.
 
-An upcoming release of Fargo has a new built-in content management system that creates static HTML files. All that's needed is a way to flow those files to a static HTTP server. That's what Fargo Publisher does. 
+<a href="http://fargo.io/docs/whatsComingInFargo2.html">Fargo 2</a>, released in February 2014, has a new built-in content management system that creates static HTML files. All that's needed is a way to flow those files to a static HTTP server. That's what Fargo Publisher does. 
 
 It defines an open protocol that any app can use to connect to static storage, no matter where the content originates. This implementation stores the files in Amazon S3, but a fork of this project could store them in files, or in another content server. 
 
@@ -80,6 +80,8 @@ You're going to need to make a few decisions before you deploy.
 
 4. What port do you want the server to run on? If you don't specify it, the server will boot on port 80.
 
+5. Do you want Fargo Publisher to redirect to the content or serve it directly? (The default is to redirect.)
+
 For my deployment I went with (Unix shell commands):
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. export fpHostingPath=/beta.fargo.io/users/
@@ -89,6 +91,8 @@ For my deployment I went with (Unix shell commands):
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. export fpDomain=smallpict.com
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. export fpServerPort=80
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5. export fpRedirect=false
 
 
 
@@ -122,79 +126,21 @@ The app is in package.js. package.json already contains all the info that node n
 
 
 
+### Heroku howto
+
+I'm running my server on Heroku, and with the help of Eric Kidd, have written a <a href="http://scripting.com/2014/02/06/herokuForPoetsBeta.html">howto</a> specific for that service. 
+
+
+
 ### Notes
 
-There's a folder of OPML files that contains the outlines that the JS and MD come from.
+There's a folder of OPML files in the repository that contains the outlines that the JavaScript and Markdown come from.
 
 We use the MIT License. Nothing proprietary about the protocol or the code. You are encouraged to clone, innovate, enjoy.
 
 I love programming in this mode. The tools are great, and node is a wonderful environment, made that way by programmers who share their work so generously. The quality of the work is very impressive. And the commitment to no breakage also refreshing in this day and age. 
 
 Thanks to Brent Simmons for his Hello World server <a href="http://inessential.com/2013/12/09/getting_started_with_node_js_for_cocoa_">example</a>. It helped this node newbie get started. He says his example is for Cocoa developers, but that's not true. I understood it, and I've never written a line of Cocoa in my life, and think it's a silly name for a programming environment. ;-)
-
-
-
-### Todo list
-
-Stats!
-
-When you go to dave.smallpict.com, the rendered website is displayed or the OPML. A choice must be made.
-
-Related question -- where to point the fpDomain environment variable. Where ever it points must be ready to redirect, based on the choice we make, above.
-
-How do we backup the database?
-
-Create an OPML file of user information, every so often.
-
-I had to <i>not</i> use the CNAME in testing yesterday. 
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The name is pub.fargo.io -- and when I tested it today it didn't work.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Doing a little <a href="https://www.nodejitsu.com/documentation/features/dns/">research</a> on Nodejitsu, they have a custom field in the package.json file, "domains" -- that apparently is where you can specify alternate names for your "drone."
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Let's see if it works...
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It doesn't. I tried going to <a href="http://pub.fargo.io/version">http://pub.fargo.io/version</a> -- and get a 404 from Nodejitsu. 
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;So I hacked it for now, with a special case in the Fargo CMS code for pub.fargo.io.
-
-
-
-
-
-### Done
-
-"This type of response MUST NOT have a body. Ignoring data passed to end()."
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Apparently this comes when you end a HEAD request with a non-empty string.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now we special-case HEAD requests, and return null.
-
-
-
-Be smarter about file types? -- Should HTML files really be text/plain type? (Are they?) 
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Amazon code seems to be smart about this, making a file with the extension .html of type text/html.
-
-
-
-Clean up console log calls. Too noisy.
-
-Make the port a configurable option.
-
-User interface in Fargo.
-
-Come up with a cname for fargopub1.jit.su. (pub.fargo.io)
-
-Create beta.fargo.io.
-
-Parameterize using environment variables. See <a href="http://stackoverflow.com/questions/4870328/how-to-read-environment-variable-in-node-js">howto</a>.
-
-Determine the S3 buckets to use for the Fargo 2 beta deploy.
-
-Import data from smallpict.com.
-
-Fix the pingpackage call to use the name not the url of the outline.
 
 
 

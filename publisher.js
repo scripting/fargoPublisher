@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/19/2014; 11:47:41 AM Eastern.
+	//Last update: 2/20/2014; 12:23:10 PM Eastern.
 var myVersion = "0.89"; 
 
 var http = require ("http");
