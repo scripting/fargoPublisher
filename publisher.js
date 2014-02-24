@@ -1,6 +1,6 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/21/2014; 12:43:39 PM Eastern.
-var myVersion = "0.89"; 
+	//Last update: 2/24/2014; 11:38:55 AM Eastern.
+var myVersion = "0.90"; 
 
 var http = require ("http");
 var request = require ("request");
@@ -100,6 +100,10 @@ function isAlpha (ch) {
 	}
 function isNumeric (ch) {
 	return ((ch >= '0') && (ch <= '9'));
+	}
+function secondsSince (when) { //2/24/14 by DW
+	var now = new Date ();
+	return ((now - when) / 1000);
 	}
 function cleanName (name) {
 	var s = "";
@@ -308,9 +312,11 @@ function statsAddToChanges (url) { //add an item to changes.json -- 1/29/14 by D
 		s3NewObject (path, JSON.stringify (changes, undefined, 3));
 		});
 	}
-function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage) { //2/11/14 by DW
+function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage, startTime) { //2/11/14 by DW
 	var host = httpRequest.headers.host, url = httpRequest.url, ip = httpRequest.connection.remoteAddress, now = new Date ();
-	
+	if (startTime == undefined) {
+		startTime = new Date ();
+		}
 	serverStats.ctHits++;
 	serverStats.ctHitsThisRun++;
 	if (!sameDay (serverStats.today, now)) { //date rollover
@@ -320,7 +326,8 @@ function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage) { //2/11/14 
 	serverStats.ctHitsToday++;
 	
 	var obj = new Object ();
-	obj.when = new Date ().toUTCString ();
+	obj.when = now.toUTCString ();
+	obj.secs = secondsSince (startTime); //2/24/14 by DW
 	obj.url = "http://" + host + url;
 	if (urlRedirect != undefined) {
 		obj.urlRedirect = urlRedirect;
@@ -482,7 +489,7 @@ http.createServer (function (httpRequest, httpResponse) {
 			if (serverPrefs.redirects [lowerhost] != undefined) {
 				var newurl = "http://" + serverPrefs.redirects [lowerhost] + parsedUrl.pathname;
 				httpResponse.writeHead (302, {"location": newurl});
-				statsAddToHttpLog (httpRequest, newurl); 
+				statsAddToHttpLog (httpRequest, newurl, undefined, now); 
 				httpResponse.end ("302 REDIRECT");    
 				return;
 				}
@@ -493,7 +500,7 @@ http.createServer (function (httpRequest, httpResponse) {
 				if (flRedirect) { //2/17/14 by DW
 					var newurl = "http:/" + s3path;
 					httpResponse.writeHead (302, {"location": newurl});
-					statsAddToHttpLog (httpRequest, newurl); 
+					statsAddToHttpLog (httpRequest, newurl, undefined, now); 
 					httpResponse.end ("302 REDIRECT");    
 					}
 				else {
@@ -505,19 +512,18 @@ http.createServer (function (httpRequest, httpResponse) {
 					s3GetObject (s3path, function (data) {
 						if (data == null) {
 							httpResponse.writeHead (404, {"Content-Type": "text/plain"});
-							statsAddToHttpLog (httpRequest); 
+							statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 							httpResponse.end ("There is no content to display at \"" + s3path + "\".");
 							}
 						else {
 							httpResponse.writeHead (200, {"Content-Type": "text/html"});
-							statsAddToHttpLog (httpRequest); 
+							statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 							httpResponse.end (data.Body);    
 							}
 						});
 					}
 				return;
 				}
-		statsAddToHttpLog (httpRequest); 
 		
 		switch (lowercasepath) {
 			case "/pingpackage":
@@ -527,12 +533,15 @@ http.createServer (function (httpRequest, httpResponse) {
 				
 				var x = {"url": parsedUrl.query.link};
 				var s = "getData (" + JSON.stringify (x) + ")";
+				
+				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				httpResponse.end (s);    
 				
 				break;
 			case "/isnameavailable":
 				function sendStringBack (s) {
 					var x = {"message": s};
+					statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 					}
 				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
@@ -574,21 +583,25 @@ http.createServer (function (httpRequest, httpResponse) {
 				
 				if (url == undefined) {
 					var x = {flError: true, errorString: "Can't assign the name because there is no <i>url</i> parameter provided."};
+					statsAddToHttpLog (httpRequest, undefined, x.errorString, now); 
 					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 					}
 				else {
 					isNameDefined (recordkey, function (fldefined) {
 						if (fldefined) {
 							var x = {flError: true, errorString: "Can't assign the name '" + recordkey + "' to the outline because there already is an outline with that name."};
+							statsAddToHttpLog (httpRequest, undefined, x.errorString, now); 
 							httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 							}
 						else {
 							addNameRecord (recordkey, url, function (err, data) {
 								if (err) {
+									statsAddToHttpLog (httpRequest, undefined, err, now); 
 									httpResponse.end ("getData (" + JSON.stringify (err) + ")");    
 									}
 								else {
 									var x = {flError: false, name: recordkey + "." + myDomain};
+									statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 									httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 									}
 								});
@@ -607,16 +620,19 @@ http.createServer (function (httpRequest, httpResponse) {
 					else {
 						var obj = JSON.parse (jsontext);
 						var x = {flError: false, url: obj.opmlUrl};
+						statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 						httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 						}
 					});
 				break;
 			case "/version":
 				httpResponse.writeHead (200, {"Content-Type": "text/plain"});
+				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				httpResponse.end (myVersion);    
 				break;
 			case "/now": //2/9/14 by DW
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
+				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				httpResponse.end (nowstring);    
 				break;
 			case "/httpreadurl": //2/10/14 by DW
@@ -626,6 +642,7 @@ http.createServer (function (httpRequest, httpResponse) {
 						type = parsedUrl.query.type;
 						}
 					httpResponse.writeHead (200, {"Content-Type": type, "Access-Control-Allow-Origin": "*"});
+					statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 					httpResponse.end (s);    
 					});
 				break;
@@ -638,6 +655,7 @@ http.createServer (function (httpRequest, httpResponse) {
 					hitsToday: serverStats.ctHitsToday
 					};
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
+				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				httpResponse.end (JSON.stringify (myStatus, undefined, 4));    
 				break;
 			case "/httpurlschanged": //2/13/14 by DW
@@ -670,6 +688,7 @@ http.createServer (function (httpRequest, httpResponse) {
 						}
 					else {
 						httpResponse.writeHead (200, {"Content-Type": "application/json"});
+						statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 						httpResponse.end ("getData (" + JSON.stringify (returnstruct) + ")");    
 						
 						}
@@ -719,6 +738,7 @@ http.createServer (function (httpRequest, httpResponse) {
 						if (!error) {
 							if (response.statusCode == 200) {
 								httpResponse.writeHead (200, {"Content-Type": "application/json"});
+								statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 								httpResponse.end ("getData (" + JSON.stringify ({length: response.headers ["content-length"], type: response.headers ["content-type"]}) + ")");    
 								flhaveresult = true;
 								}
@@ -737,6 +757,6 @@ http.createServer (function (httpRequest, httpResponse) {
 			}
 		}
 	catch (tryError) {
-		statsAddToHttpLog (httpRequest, undefined, tryError.message); 
+		statsAddToHttpLog (httpRequest, undefined, tryError.message, now); 
 		}
 	}).listen (myPort);

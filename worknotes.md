@@ -1,3 +1,9 @@
+### 2/24/14 by DW
+
+v0.90 -- New item in the httpLog.json file, the number of seconds it took to process the request. Using this to monitor the server to see if increased traffic is causing it to slow down. 
+
+
+
 ### 2/19/14 AM by DW
 
 v0.89 -- if we're not redirecting, and the path ends with "/", get index.html. Pretty standard server stuff.
