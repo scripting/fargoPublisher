@@ -118,7 +118,7 @@ Set environment variables with your S3 paths and the domain you're using.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDataPath -- where you want names and stats to be stored. 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDomain -- the domain we're allocating (should be set, via DNS and AWS, where it should point is still TBD).
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDomain -- the domain we're allocating.
 
 
 

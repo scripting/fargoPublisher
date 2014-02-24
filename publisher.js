@@ -1,5 +1,5 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/24/2014; 11:38:55 AM Eastern.
+	//Last update: 2/24/2014; 3:45:46 PM Eastern.
 var myVersion = "0.90"; 
 
 var http = require ("http");
@@ -319,6 +319,7 @@ function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage, startTime) {
 		}
 	serverStats.ctHits++;
 	serverStats.ctHitsThisRun++;
+	serverStats.version = myVersion;  //2/24/14 by DW
 	if (!sameDay (serverStats.today, now)) { //date rollover
 		serverStats.today = now;
 		serverStats.ctHitsToday = 0;
