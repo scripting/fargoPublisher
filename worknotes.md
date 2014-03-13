@@ -1,3 +1,9 @@
+### 3/12/14 by DW
+
+<a href="http://fargo.io/blog/2014/03/12/fargoPublisher092.html">v0.92</a> -- If we get the address of a folder, and the folder contains an index.html file, serve that file. Pretty standard server behavior. 
+
+
+
 ### 2/24/14 by DW
 
 v0.90 -- New item in the httpLog.json file, the number of seconds it took to process the request. Using this to monitor the server to see if increased traffic is causing it to slow down. 

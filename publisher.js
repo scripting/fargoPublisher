@@ -1,6 +1,6 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 2/24/2014; 3:45:46 PM Eastern.
-var myVersion = "0.90"; 
+	//Last update: 3/12/2014; 9:54:33 PM Eastern.
+var myVersion = "0.92"; 
 
 var http = require ("http");
 var request = require ("request");
@@ -505,19 +505,34 @@ http.createServer (function (httpRequest, httpResponse) {
 					httpResponse.end ("302 REDIRECT");    
 					}
 				else {
+					var contentType = "text/html";
 					
 					if (endsWith (s3path, "/")) { //2/19/14 by DW
 						s3path += "index.html";
 						}
 					
+					if (parsedUrl.pathname.toLowerCase () == "/favicon.ico") { //2/26/14 by DW
+						s3path = "/fargo.io/favicon.ico";
+						contentType = "image/gif";
+						}
+					
 					s3GetObject (s3path, function (data) {
 						if (data == null) {
-							httpResponse.writeHead (404, {"Content-Type": "text/plain"});
-							statsAddToHttpLog (httpRequest, undefined, undefined, now); 
-							httpResponse.end ("There is no content to display at \"" + s3path + "\".");
+							s3GetObject (s3path + "/index.html", function (data) {
+								if (data == null) {
+									httpResponse.writeHead (404, {"Content-Type": "text/plain"});
+									statsAddToHttpLog (httpRequest, undefined, undefined, now); 
+									httpResponse.end ("There is no content to display at \"" + s3path + "\".");
+									}
+								else {
+									httpResponse.writeHead (200, {"Content-Type": contentType});
+									statsAddToHttpLog (httpRequest, undefined, undefined, now); 
+									httpResponse.end (data.Body);    
+									}
+								});
 							}
 						else {
-							httpResponse.writeHead (200, {"Content-Type": "text/html"});
+							httpResponse.writeHead (200, {"Content-Type": contentType});
 							statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 							httpResponse.end (data.Body);    
 							}
