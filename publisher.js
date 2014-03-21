@@ -1,6 +1,6 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 3/12/2014; 9:54:33 PM Eastern.
-var myVersion = "0.92"; 
+	//Last update: 3/21/2014; 12:41:18 PM Eastern.
+var myVersion = "0.93"; 
 
 var http = require ("http");
 var request = require ("request");
@@ -487,13 +487,16 @@ http.createServer (function (httpRequest, httpResponse) {
 				return;
 				}
 		//handle redirect through the prefs/redirects table -- 2/11/14 by DW
-			if (serverPrefs.redirects [lowerhost] != undefined) {
-				var newurl = "http://" + serverPrefs.redirects [lowerhost] + parsedUrl.pathname;
-				httpResponse.writeHead (302, {"location": newurl});
-				statsAddToHttpLog (httpRequest, newurl, undefined, now); 
-				httpResponse.end ("302 REDIRECT");    
-				return;
+			if ((serverPrefs != undefined) && (serverPrefs.redirects != undefined)) {
+				if (serverPrefs.redirects [lowerhost] != undefined) {
+					var newurl = "http://" + serverPrefs.redirects [lowerhost] + parsedUrl.pathname;
+					httpResponse.writeHead (302, {"location": newurl});
+					statsAddToHttpLog (httpRequest, newurl, undefined, now); 
+					httpResponse.end ("302 REDIRECT");    
+					return;
+					}
 				}
+			
 		//handle redirect through the domain we're managing -- 2/10/14 by DW
 			var lowerdomain = myDomain.toLowerCase ();
 			if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com

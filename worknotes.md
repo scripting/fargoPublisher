@@ -1,3 +1,9 @@
+### 3/21/14 by DW
+
+v0.93 -- Make sure serverPrefs is defined and serverPrefs.redirects is defined, before trying to redirect through that table. 
+
+
+
 ### 3/12/14 by DW
 
 <a href="http://fargo.io/blog/2014/03/12/fargoPublisher092.html">v0.92</a> -- If we get the address of a folder, and the folder contains an index.html file, serve that file. Pretty standard server behavior. 
