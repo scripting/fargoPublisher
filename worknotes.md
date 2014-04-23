@@ -3,6 +3,7 @@
 <a href="http://fargo.io/blog/2014/04/23/fargoPublisher095.html">v0.95</a> -- Add the ability to define pages in Fargo Publisher in JavaScript script. 
 
 
+
 ### 3/21/14 by DW
 
 v0.93 -- Make sure serverPrefs is defined and serverPrefs.redirects is defined, before trying to redirect through that table. 
