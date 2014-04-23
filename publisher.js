@@ -1,6 +1,6 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 4/23/2014; 2:28:14 PM Eastern.
-var myVersion = "0.95"; 
+	//Last update: 4/23/2014; 5:36:21 PM Eastern.
+var myVersion = "0.96"; 
 
 var http = require ("http");
 var request = require ("request");
@@ -9,6 +9,7 @@ var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var dns = require ("dns");
 
+var globals = new Object (); //4/23/14 by DW
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";

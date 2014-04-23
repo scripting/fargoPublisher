@@ -1,5 +1,11 @@
 ### 4/23/14 by DW
 
+v0.96 -- Add the <i>globals</i> object, so scripts can have a scratchpad to work with.
+
+
+
+### 4/23/14 by DW
+
 <a href="http://fargo.io/blog/2014/04/23/fargoPublisher095.html">v0.95</a> -- Add the ability to define pages in Fargo Publisher in JavaScript script. 
 
 
