@@ -1,6 +1,6 @@
 //Copyright 2014, Small Picture, Inc.
-	//Last update: 3/21/2014; 12:41:18 PM Eastern.
-var myVersion = "0.93"; 
+	//Last update: 4/23/2014; 2:11:49 PM Eastern.
+var myVersion = "0.95"; 
 
 var http = require ("http");
 var request = require ("request");
@@ -18,6 +18,7 @@ var s3DataPath = process.env.fpDataPath;
 var s3NamesPath = s3DataPath + "names/"; 
 var s3StatsPath = s3DataPath + "stats/"; 
 var s3SPrefsPath = s3DataPath + "prefs/"; 
+var s3SScriptsPath = s3DataPath + "scripts/"; //4/5/14 by DW
 
 var myDomain = process.env.fpDomain; //something like smallpict.com
 
@@ -769,10 +770,28 @@ http.createServer (function (httpRequest, httpResponse) {
 						});
 					}
 				break;
-			default:
-				httpResponse.writeHead (404, {"Content-Type": "text/plain"});
-				httpResponse.end ("\"" + parsedUrl.pathname + "\" is not one of the endpoints defined by the Fargo Publsiher API.");
+			default: //see if it's in the scripts folder, if not 404 -- 4/5/14 by DW
+				var scriptpath = s3SScriptsPath + lowercasepath.substr (1) + ".js"; //drop leading / on lowercasepath
+				s3GetObject (scriptpath, function (data) {
+					if (data == null) {
+						httpResponse.writeHead (404, {"Content-Type": "text/plain"});
+						httpResponse.end ("\"" + parsedUrl.pathname + "\" is not one of the endpoints defined by the Fargo Publisher API.");
+						}
+					else {
+						try {
+							var val = eval (data.Body.toString ());
+							statsAddToHttpLog (httpRequest, undefined, undefined, now); 
+							httpResponse.writeHead (200, {"Content-Type": "text/html"});
+							httpResponse.end (val.toString ());    
+							}
+						catch (err) {
+							httpResponse.writeHead (503, {"Content-Type": "text/plain"});
+							httpResponse.end (err.message);    
+							}
+						}
+					});
 				break;
+				
 			}
 		}
 	catch (tryError) {
