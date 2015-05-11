@@ -10,8 +10,6 @@ It's open source, using the MIT License.
 
 This document includes information you need to install a server, and technical information for implementers.
 
-
-
 ### How names work
 
 Each outline can be given a public name.
@@ -26,8 +24,6 @@ There's only one element of the &lt;head> section of that outline that we care a
 
 The rest of the outline contents is  up to the user.
 
-
-
 ### User experience (set up)
 
 The Fargo user brings the outline he or she wants to make public to the front.
@@ -39,8 +35,6 @@ A <a href="http://static.scripting.com/larryKing/images/2013/05/14/choosePublicN
 Type a name. As you type the software tells you whether the name is taken. It does this with a call to Fargo Publisher.
 
 When you click OK, a message is sent to Fargo Publisher to associate that name with the public URL of the outline. Getting a public URL for a file is a feature of Dropbox.
-
-
 
 ### User experience (publishing)
 
@@ -54,8 +48,6 @@ Publisher then reads the outline (it was registered in the previous step) locate
 
 Publisher sends back to Fargo the base URL of the folder, which is then hooked into the Eye icon, which can be used to view the headline the cursor points to.
 
-
-
 ### User experience (viewing rendered content)
 
 The Eye icon in the left margin of Fargo is super-important.
@@ -65,8 +57,6 @@ It connects the editing context with the viewing context.
 Put the cursor on any headline in a public outline, and click the <a href="http://static.scripting.com/larryKing/images/2014/01/23/theAllImportantEye.gif">Eye</a>.
 
 A new tab opens with the rendered view of that section of the outline.
-
-
 
 ### Before deploy
 
@@ -84,19 +74,15 @@ You're going to need to make a few decisions before you deploy.
 
 For my deployment I went with (Unix shell commands):
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. export fpHostingPath=/beta.fargo.io/users/
+1. export fpHostingPath=/beta.fargo.io/users/
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2. export fpDataPath=/beta.fargo.io/data/
+2. export fpDataPath=/beta.fargo.io/data/
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3. export fpDomain=smallpict.com
+3. export fpDomain=smallpict.com
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4. export fpServerPort=80
+4. export fpServerPort=80
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5. export fpRedirect=false
-
-
-
-
+5. export fpRedirect=false
 
 ### How to deploy
 
@@ -106,31 +92,37 @@ Install <a href="https://github.com/mikeal/request">request</a>, <a href="http:/
 
 Set environment variables for AWS.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AWS_ACCESS_KEY_ID
+1. AWS_ACCESS_KEY_ID
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AWS_SECRET_ACCESS_KEY
-
-
+2. AWS_SECRET_ACCESS_KEY
 
 Set environment variables with your S3 paths and the domain you're using.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpHostingPath -- where the users' files will be stored.
+1. fpHostingPath -- where the users' files will be stored.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDataPath -- where you want names and stats to be stored. 
+2. fpDataPath -- where you want names and stats to be stored. 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fpDomain -- the domain we're allocating.
-
-
+3. fpDomain -- the domain we're allocating.
 
 The app is in package.js. package.json already contains all the info that node needs to run it.
-
-
 
 ### Heroku howto
 
 I'm running my server on Heroku, and with the help of Eric Kidd, have written a <a href="http://scripting.com/2014/02/06/herokuForPoetsBeta.html">howto</a> specific for that service. 
 
+### Updates
 
+#### v0.97 5/11/15 by DW
+
+It's been over a year since the last update to Fargo Publisher, and I've learned a lot about Node and JavaScript since then.
+
+The major change in this release is that you can now specify all the environment variables in a file called config.json in the same folder as the publisher.js file. The values in this file take precedence over the environment variables. You still have to set the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY through environment variables because that's where the AWS software will look for them.
+
+I'm no longer maintaining the OPML versions of the files, so I removed the folder from the repository.
+
+Same with worknotes.md.
+
+I was previously running my server on Heroku, but now am running it along with my other server software on a Ubuntu instance on AWS.
 
 ### Notes
 
@@ -141,6 +133,4 @@ We use the MIT License. Nothing proprietary about the protocol or the code. You 
 I love programming in this mode. The tools are great, and node is a wonderful environment, made that way by programmers who share their work so generously. The quality of the work is very impressive. And the commitment to no breakage also refreshing in this day and age. 
 
 Thanks to Brent Simmons for his Hello World server <a href="http://inessential.com/2013/12/09/getting_started_with_node_js_for_cocoa_">example</a>. It helped this node newbie get started. He says his example is for Cocoa developers, but that's not true. I understood it, and I've never written a line of Cocoa in my life, and think it's a silly name for a programming environment. ;-)
-
-
 

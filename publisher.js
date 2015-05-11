@@ -1,6 +1,6 @@
-//Copyright 2014, Small Picture, Inc.
-	//Last update: 4/23/2014; 5:36:21 PM Eastern.
-var myVersion = "0.96"; 
+//Copyright 2014-2015, Small Picture, Inc.
+	//Last update: &lt;%now%&gt; Eastern.
+var myVersion = "0.97", myProductName = "Fargo Publisher"; 
 
 var http = require ("http");
 var request = require ("request");
@@ -8,18 +8,20 @@ var urlpack = require ("url");
 var AWS = require ("aws-sdk");
 var s3 = new AWS.S3 ();
 var dns = require ("dns");
+var os = require ("os");
+var fs = require ("fs"); //5/10/15 by DW
 
-var globals = new Object (); //4/23/14 by DW
+var fnameConfig = "config.json"; //5/9/15 by DW
 
 var s3HostingPath = process.env.fpHostingPath; //where we store all the users' HTML and XML files
 var s3defaultType = "text/plain";
 var s3defaultAcl = "public-read";
 
 var s3DataPath = process.env.fpDataPath;
-var s3NamesPath = s3DataPath + "names/"; 
-var s3StatsPath = s3DataPath + "stats/"; 
-var s3SPrefsPath = s3DataPath + "prefs/"; 
-var s3SScriptsPath = s3DataPath + "scripts/"; //4/5/14 by DW
+var s3NamesPath; 
+var s3StatsPath; 
+var s3SPrefsPath; 
+var s3SScriptsPath; 
 
 var myDomain = process.env.fpDomain; //something like smallpict.com
 
@@ -97,6 +99,35 @@ function padWithZeros (num, ctplaces) {
 		}
 	return (s);
 	}
+function stringContains (s, whatItMightContain, flUnicase) { //11/9/14 by DW
+	if (flUnicase === undefined) {
+		flUnicase = true;
+		}
+	if (flUnicase) {
+		s = s.toLowerCase ();
+		whatItMightContain = whatItMightContain.toLowerCase ();
+		}
+	return (s.indexOf (whatItMightContain) != -1);
+	}
+function stringCountFields (s, chdelim) {
+	var ct = 1;
+	if (s.length == 0) {
+		return (0);
+		}
+	for (var i = 0; i < s.length; i++) {
+		if (s [i] == chdelim) {
+			ct++;
+			}
+		}
+	return (ct)
+	}
+function stringNthField (s, chdelim, n) {
+	var splits = s.split (chdelim);
+	if (splits.length >= n) {
+		return splits [n-1];
+		}
+	return ("");
+	}
 function isAlpha (ch) {
 	return (((ch >= 'a') && (ch <= 'z')) || ((ch >= 'A') && (ch <= 'Z')));
 	}
@@ -106,6 +137,26 @@ function isNumeric (ch) {
 function secondsSince (when) { //2/24/14 by DW
 	var now = new Date ();
 	return ((now - when) / 1000);
+	}
+function kilobyteString (num) { //1/24/15 by DW
+	num = Number (num) / 1024;
+	return (num.toFixed (2) + "K");
+	}
+function megabyteString (num) { //1/24/15 by DW
+	var onemeg = 1024 * 1024;
+	if (num <= onemeg) {
+		return (kilobyteString (num));
+		}
+	num = Number (num) / onemeg;
+	return (num.toFixed (2) + "MB");
+	}
+function gigabyteString (num) { //1/24/15 by DW
+	var onegig = 1024 * 1024 * 1024;
+	if (num <= onegig) {
+		return (megabyteString (num));
+		}
+	num = Number (num) / onegig;
+	return (num.toFixed (2) + "GB");
 	}
 function cleanName (name) {
 	var s = "";
@@ -359,7 +410,7 @@ function statsAddToHttpLog (httpRequest, urlRedirect, errorMessage, startTime) {
 		}
 	
 	}
-function loadServerStats () {
+function loadServerStats (callback) {
 	s3GetObject (s3StatsPath + nameHttpLogFile, function (data) {
 		if (data != null) {
 			serverStats = JSON.parse (data.Body);
@@ -372,13 +423,18 @@ function loadServerStats () {
 				}
 			serverStats.whenServerStart = new Date ().toUTCString ();
 			}
+		if (callback !== undefined) {
+			callback ();
+			}
 		});
 	}
-function loadServerPrefs () {
+function loadServerPrefs (callback) {
 	s3GetObject (s3SPrefsPath + namePrefsFile, function (data) {
 		if (data != null) {
 			serverPrefs = JSON.parse (data.Body);
-			consoleLog ("loadServerPrefs: " + data.Body);
+			}
+		if (callback !== undefined) {
+			callback ();
 			}
 		});
 	}
@@ -456,33 +512,23 @@ function handlePackagePing (subdomain) { //something like http://dave.smallpict.
 			}
 		});
 	}
-
-//initial console messages
-	console.log ("");
-	console.log ("");
-	console.log ("Fargo Publisher server v" + myVersion + ".");
-	console.log ("");
-	console.log ("S3 data path == " + s3DataPath + ".");
-	console.log ("S3 names path == " + s3NamesPath + ".");
-	console.log ("S3 stats path == " + s3StatsPath + ".");
-	console.log ("Domain == " + myDomain + ".");
-	console.log ("Port == " + myPort + ".");
-	console.log ("Redirect == " + getBoolean (flRedirect) + ".");
-	
-	
-	console.log ("");
-//get previous stats, prefs -- 2/11/14 by DW
-	loadServerPrefs ();
-	loadServerStats ();
-
-http.createServer (function (httpRequest, httpResponse) {
+function handleRequest (httpRequest, httpResponse) { //5/10/15 by DW
 	try {
 		var parsedUrl = urlpack.parse (httpRequest.url, true);
 		var lowercasepath = parsedUrl.pathname.toLowerCase ();
 		var now = new Date (), nowstring = now.toString ();
-		var host = httpRequest.headers.host;
-		var lowerhost = host.toLowerCase ();
+		var host, port, lowerhost, referrer;
 		
+		//set host, port -- 5/10/15 by DW
+			host = httpRequest.headers.host;
+			if (stringContains (host, ":")) {
+				port = stringNthField (host, ":", 2);
+				host = stringNthField (host, ":", 1);
+				}
+			else {
+				port = 80;
+				}
+			lowerhost = host.toLowerCase ();
 		//handle HEAD request
 			if (httpRequest.method == "HEAD") {
 				httpRequest.end ("");
@@ -499,10 +545,23 @@ http.createServer (function (httpRequest, httpResponse) {
 					}
 				}
 			
-		//handle redirect through the domain we're managing -- 2/10/14 by DW
-			var lowerdomain = myDomain.toLowerCase ();
-			if (endsWith (lowerhost, lowerdomain)) { //something like dave.smallpict.com
-				var s3path = s3HostingPath + getNameFromSubdomain (host) + parsedUrl.pathname;
+		//handle redirect through the domain we're managing -- 5/10/15 by DW
+			var flhosted = false, lowerdomain = myDomain.toLowerCase (), usethishost;
+			if (endsWith (lowerhost, lowerdomain)) {
+				flhosted = true;
+				usethishost = host;
+				}
+			else {
+				var forwardedhost = httpRequest.headers ["x-forwarded-host"];
+				if (forwardedhost !== undefined) {
+					if (endsWith (forwardedhost.toLowerCase (), lowerdomain)) {
+						flhosted = true;
+						usethishost = forwardedhost;
+						}
+					}
+				}
+			if (flhosted) { //something like dave.smallpict.com
+				var s3path = s3HostingPath + getNameFromSubdomain (usethishost) + parsedUrl.pathname;
 				if (flRedirect) { //2/17/14 by DW
 					var newurl = "http:/" + s3path;
 					httpResponse.writeHead (302, {"location": newurl});
@@ -543,8 +602,29 @@ http.createServer (function (httpRequest, httpResponse) {
 							}
 						});
 					}
+				console.log (now.toLocaleTimeString () + ": " + s3HostingPath + getNameFromSubdomain (usethishost) + parsedUrl.pathname);
 				return;
 				}
+		//set referrer -- 5/10/15 by DW
+			referrer = httpRequest.headers.referer;
+			if (referrer == undefined) {
+				referrer = "";
+				}
+			
+		//log the request -- 5/10/15 by DW
+			var client = httpRequest.connection.remoteAddress;
+			if (httpRequest.headers ["x-forwarded-for"] !== undefined) {
+				client = httpRequest.headers ["x-forwarded-for"];
+				}
+			dns.reverse (client, function (err, domains) {
+				var freemem = gigabyteString (os.freemem ()); //1/24/15 by DW
+				if (!err) {
+					if (domains.length > 0) {
+						client = domains [0];
+						}
+					}
+				console.log (now.toLocaleTimeString () + " " + freemem + " " + httpRequest.method + " " + host + ":" + port + " " + lowercasepath + " " + referrer + " " + client);
+				});
 		
 		switch (lowercasepath) {
 			case "/pingpackage":
@@ -566,11 +646,7 @@ http.createServer (function (httpRequest, httpResponse) {
 					httpResponse.end ("getData (" + JSON.stringify (x) + ")");    
 					}
 				httpResponse.writeHead (200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "fargo.io"});
-				
 				var name = cleanName (parsedUrl.query.name);
-				
-				consoleLog ("Is name available? name == " + name);
-				
 				if (name.length == 0) {
 					sendStringBack ("");    
 					}
@@ -593,7 +669,6 @@ http.createServer (function (httpRequest, httpResponse) {
 							});
 						}
 					}
-				
 				break;
 			case "/newoutlinename":
 				var recordkey = cleanName (parsedUrl.query.name), url = parsedUrl.query.url;
@@ -653,8 +728,8 @@ http.createServer (function (httpRequest, httpResponse) {
 				break;
 			case "/now": //2/9/14 by DW
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
-				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				httpResponse.end (nowstring);    
+				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				break;
 			case "/httpreadurl": //2/10/14 by DW
 				var type = "text/plain";
@@ -676,8 +751,8 @@ http.createServer (function (httpRequest, httpResponse) {
 					hitsToday: serverStats.ctHitsToday
 					};
 				httpResponse.writeHead (200, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
-				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				httpResponse.end (JSON.stringify (myStatus, undefined, 4));    
+				statsAddToHttpLog (httpRequest, undefined, undefined, now); 
 				break;
 			case "/httpurlschanged": //2/13/14 by DW
 				var urlarray = [], returnstruct = {url: []}, ct = 1;
@@ -797,5 +872,54 @@ http.createServer (function (httpRequest, httpResponse) {
 		}
 	catch (tryError) {
 		statsAddToHttpLog (httpRequest, undefined, tryError.message, now); 
+		httpResponse.writeHead (500, {"Content-Type": "text/plain", "Access-Control-Allow-Origin": "*"});
+		httpResponse.end (tryError.message);    
 		}
-	}).listen (myPort);
+	}
+function loadConfig (callback) { //5/10/15 by DW
+	fs.readFile (fnameConfig, function (err, data) {
+		if (!err) {
+			var config = JSON.parse (data.toString ());
+			if (config.fpHostingPath !== undefined) {
+				s3HostingPath = config.fpHostingPath;
+				}
+			if (config.fpDataPath !== undefined) {
+				s3DataPath = config.fpDataPath;
+				}
+			if (config.fpDomain !== undefined) {
+				myDomain = config.fpDomain;
+				}
+			if (config.fpRedirect !== undefined) {
+				flRedirect = config.fpRedirect;
+				}
+			if (config.fpServerPort !== undefined) {
+				myPort = config.fpServerPort;
+				}
+			}
+		if (callback !== undefined) {
+			callback ();
+			}
+		});
+	}
+
+function startup () {
+	loadConfig (function () {
+		s3NamesPath = s3DataPath + "names/"; 
+		s3StatsPath = s3DataPath + "stats/"; 
+		s3SPrefsPath = s3DataPath + "prefs/"; 
+		s3SScriptsPath = s3DataPath + "scripts/"; 
+		loadServerPrefs (function () {
+			loadServerStats (function () {
+				console.log ("\n" + myProductName + " v" + myVersion + " on port " + myPort + ".");
+				console.log ("\nS3 data path == " + s3DataPath);
+				console.log ("Domain == " + myDomain);
+				console.log ("Redirect == " + getBoolean (flRedirect));
+				console.log ("");
+				http.createServer (handleRequest).listen (myPort);
+				});
+			});
+		});
+	}
+
+startup ();
+
