@@ -106,10 +106,6 @@ Set environment variables with your S3 paths and the domain you're using.
 
 The app is in package.js. package.json already contains all the info that node needs to run it.
 
-### Heroku howto
-
-I'm running my server on Heroku, and with the help of Eric Kidd, have written a <a href="http://scripting.com/2014/02/06/herokuForPoetsBeta.html">howto</a> specific for that service. 
-
 ### Updates
 
 #### v0.97 5/11/15 by DW
